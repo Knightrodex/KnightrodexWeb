@@ -1,4 +1,4 @@
-const app_name = 'knightrodex-49dcc2a6c1ae'
+/* const app_name = 'knightrodex-49dcc2a6c1ae'
 exports.buildPath = 
 function buildPath(route)
 {
@@ -10,4 +10,4 @@ function buildPath(route)
     {        
         return 'http://localhost:5000/' + route;
     }
-}
+} */

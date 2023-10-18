@@ -1,10 +1,16 @@
 const express = require('express');
-const loginRouter = require('./API/Login');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
+// const loginRouter = require('./API/Login');
 
 const path = require('path');
 const PORT = process.env.PORT || 5000;  
 
 const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
 
 require('dotenv').config();
 const url = process.env.MONGODB_URI;
@@ -12,12 +18,12 @@ const MongoClient = require('mongodb').MongoClient;
 const client = new MongoClient(url);
 client.connect();
 
-let api = require('./API/Login.js');
+let api = require('./api.js');
 api.setApp(app, client);
 
 app.set('port', (process.env.PORT || 5000));
 // Use the login API
-app.use('/api', loginRouter);
+// app.use('/api', loginRouter);
 
 
 app.listen(PORT, () => {

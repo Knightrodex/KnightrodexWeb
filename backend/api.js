@@ -1,9 +1,10 @@
 require('express');
 require('mongodb');
+
 // TODO: connect heroku finish steps in B, create client for DB, fix fetches
 exports.setApp = function ( app, client ) 
 {
-    app.post('/API/Login', async (req, res, next) => 
+    app.post('/api/login', async (req, res, next) => 
     {
       // incoming: login, password
       // outgoing: id, firstName, lastName, error
@@ -12,14 +13,14 @@ exports.setApp = function ( app, client )
     
       const { email, password } = req.body;
     
-      const db = client.db('MERN Project');
+      const db = client.db('Knightrodex');
       const results = await db.collection('User').find({email:email,password:password}).toArray();
     
       let id = -1;
       let em = '';
       let fn = '';
       let ln = '';
-    
+      
       if( results.length > 0 )
       {
         em = results[0].email;
