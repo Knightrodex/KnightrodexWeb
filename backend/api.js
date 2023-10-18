@@ -32,4 +32,32 @@ exports.setApp = function ( app, client )
       let ret = { _id:id, email: em, firstName:fn, lastName:ln, error:''};
       res.status(200).json(ret);
     });
+
+    app.post('/api/signup', async (req, res, next) =>
+    {
+        // incoming: first name, last name, email, password
+        // outgoing: first name, last name, UserID
+
+        let error = '';
+
+        const {firstName, lastName, email, password} = req.body;
+        const newUser = {password:password, email:email, badgesObtained:null, 
+                         firstName:firstName, lastName:lastName, profilePicture:null, 
+                         usersFollowed:null, dateCreated:(new Date())};
+
+        try
+        {
+          const db = client.db('Knightrodex');
+          var result = db.collection('User').insertOne(newUser);
+          console.log("UserID: " + result.insertedId);
+        }
+        catch (e)
+        {
+          error = e.toString();
+        }
+
+        var ret = {firstName:firstName, lastName:lastName, userID:result.insertedId, error:error};
+        res.status(200).json(ret);
+        
+    })
 }
