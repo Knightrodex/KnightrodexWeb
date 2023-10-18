@@ -9,7 +9,7 @@ exports.setApp = function ( app, client )
       // incoming: login, password
       // outgoing: id, firstName, lastName, error
     
-     let error = '';
+      let error = '';
     
       const { email, password } = req.body;
     
@@ -28,8 +28,12 @@ exports.setApp = function ( app, client )
         fn = results[0].firstName;
         ln = results[0].lastName;
       }
+      else
+      {
+        error = 'Invalid credentials'
+      }
     
-      let ret = { _id:id, email: em, firstName:fn, lastName:ln, error:''};
+      let ret = { _id:id, email: em, firstName:fn, lastName:ln, error:error};
       res.status(200).json(ret);
     });
 
@@ -39,6 +43,7 @@ exports.setApp = function ( app, client )
         // outgoing: first name, last name, UserID
 
         let error = '';
+        let newId = -1;
 
         const {firstName, lastName, email, password} = req.body;
         const newUser = {password:password, email:email, badgesObtained:null, 
@@ -48,16 +53,15 @@ exports.setApp = function ( app, client )
         try
         {
           const db = client.db('Knightrodex');
-          var result = db.collection('User').insertOne(newUser);
-          console.log("UserID: " + result.insertedId);
+          const result = await db.collection('User').insertOne(newUser);
+          newId = result.insertedId;
         }
         catch (e)
         {
           error = e.toString();
         }
 
-        var ret = {firstName:firstName, lastName:lastName, userID:result.insertedId, error:error};
+        let ret = {_id:newId, firstName:firstName, lastName:lastName, error:error};
         res.status(200).json(ret);
-        
     })
 }
