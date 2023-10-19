@@ -39,7 +39,7 @@ exports.setApp = function ( app, client )
     app.post('/api/signup', async (req, res, next) =>
     {
         // incoming: first name, last name, email, password
-        // outgoing: first name, last name, UserID
+        // outgoing: userID, first name, last name
 
         let error = '';
         let newId = -1;
