@@ -1,7 +1,6 @@
 require('express');
 require('mongodb');
 
-// TODO: connect heroku finish steps in B, create client for DB, fix fetches
 exports.setApp = function ( app, client ) 
 {
     app.post('/api/login', async (req, res, next) => 
