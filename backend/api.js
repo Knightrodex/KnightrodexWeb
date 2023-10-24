@@ -1,3 +1,4 @@
+var md5 = require('./md5')
 require('express');
 require('mongodb');
 
@@ -11,9 +12,10 @@ exports.setApp = function ( app, client )
       let error = '';
     
       const { email, password } = req.body;
+      let hashPassword = md5(password);
     
       const db = client.db('Knightrodex');
-      const results = await db.collection('User').find({email:email,password:password}).toArray();
+      const results = await db.collection('User').find({email:email,password:hashPassword}).toArray();
     
       let id = -1;
       let em = '';
@@ -29,7 +31,7 @@ exports.setApp = function ( app, client )
       }
       else
       {
-        error = 'Invalid credentials'
+        error = 'Invalid credentials';
       }
     
       let ret = { _id:id, email: em, firstName:fn, lastName:ln, error:error};
@@ -45,15 +47,27 @@ exports.setApp = function ( app, client )
         let newId = -1;
 
         const {firstName, lastName, email, password} = req.body;
-        const newUser = {password:password, email:email, badgesObtained:null, 
+
+        const hashPassword = md5(password);
+
+        const newUser = {password:hashPassword, email:email, badgesObtained:null, 
                          firstName:firstName, lastName:lastName, profilePicture:null, 
                          usersFollowed:null, dateCreated:(new Date())};
 
         try
         {
           const db = client.db('Knightrodex');
-          const result = await db.collection('User').insertOne(newUser);
-          newId = result.insertedId;
+
+          const existingUser = await db.collection('User').find({email:email}).toArray();
+          if (existingUser.length > 0)
+          {
+            error = 'User with the given email already exists';
+          }
+          else
+          {
+            const result = await db.collection('User').insertOne(newUser);
+            newId = result.insertedId;
+          }
         }
         catch (e)
         {
