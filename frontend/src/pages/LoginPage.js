@@ -104,7 +104,7 @@ function Login() {
                                 <button className="btn btn-info btn-lg btn-block" type="submit">Login</button>
                             </div>
                             <p className="small mb-5 pb-lg-2"><a className="text-muted" href="#!">Forgot password?</a></p>
-                            <p>Don't have an account? <a href="/SignUp" className="link-info">Register here</a></p>
+                            <p>Don't have an account? <a href={buildPath('/SignUp')} className="link-info">Register here</a></p>
                         </form>
                     </div>
                     <div className="col-sm-6 px-0 d-none d-sm-block" style={{ maxHeight: '100vh', overflow: 'hidden' }}>

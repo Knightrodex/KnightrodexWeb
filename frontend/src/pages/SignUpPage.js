@@ -85,7 +85,7 @@ const SignUp = () => {
                 setError('An error occurred during registration. Please try again later.');
             }
 
-            window.location.href = '/';
+            window.location.href = buildPath('/');
 
         }
     }
