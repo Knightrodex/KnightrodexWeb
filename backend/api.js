@@ -51,7 +51,7 @@ exports.setApp = function ( app, client )
 
         const hashPassword = md5(password);
 
-        const newUser = {password:hashPassword, email:email, badgesObtained:null, 
+        const newUser = {password:hashPassword, email:email, badgesObtained:[], 
                          firstName:firstName, lastName:lastName, profilePicture:null, 
                          usersFollowed:null, dateCreated:(new Date())};
 
@@ -95,6 +95,8 @@ exports.setApp = function ( app, client )
           if (badgeInfo)
           {
             const badgeToAdd = {badgeId: new ObjectId(badgeId), dateObtained: new Date(), uniqueNumber: 1};
+            const userInfo = await db.collection('User').find({ _id: new ObjectId(userId) }).toArray();
+            console.log(userInfo);
             userCollection.updateOne(
               { _id: new ObjectId(userId) },
               { $push: {"badgesObtained": badgeToAdd }})
