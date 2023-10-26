@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 var md5 = require('./md5')
 require('express');
 require('mongodb');
@@ -76,5 +77,38 @@ exports.setApp = function ( app, client )
 
         let ret = {_id:newId, firstName:firstName, lastName:lastName, error:error};
         res.status(200).json(ret);
-    })
+    });
+
+    app.post('/api/badge', async (req, res, next) => {
+      const { userId, badgeId } = req.body;
+      console.log(req.body);
+      console.log(userId);
+      console.log(badgeId);
+      const db = client.db('Knightrodex');
+      const badgeInfo = await db.collection('Badge').find({ _id: new ObjectId(badgeId) }).toArray();
+      console.log(badgeInfo);
+
+      const userCollection = db.collection('User');
+
+      try {
+        // Assuming you have a 'badges' collection
+          if (badgeInfo)
+          {
+            const badgeToAdd = {badgeId: new ObjectId(badgeId), dateObtained: new Date(), uniqueNumber: 1};
+            userCollection.updateOne(
+              { _id: new ObjectId(userId) },
+              { $push: {"badgesObtained": badgeToAdd }})
+
+              res.json(badgeInfo);
+          }
+          else
+          {
+            res.status(404).json({ message: 'Badge not found'});
+          }
+        }
+        catch (error){
+          console.error(error);
+          res.status(500).json({error: 'Internal server error'});
+        }
+    });
 }
