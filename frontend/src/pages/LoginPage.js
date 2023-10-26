@@ -5,10 +5,22 @@ import 'bootstrap/dist/css/bootstrap.css';
 
 function Login() {
 
+    const app_name = 'knightrodex-49dcc2a6c1ae'
+    function buildPath(route) {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://' + app_name + '.herokuapp.com/' + route;
+        }
+        else {
+            return 'http://localhost:5000/' + route;
+        }
+    }
+
+
     // State variables
     const [loginUsername, setLoginUsername] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [error, setError] = useState('');
+
 
     const doLogin = async (e) => {
         e.preventDefault();
@@ -19,7 +31,7 @@ function Login() {
         };
 
         try {
-            const response = await fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/login', {
+            const response = await fetch(buildPath('/api/login'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,6 +63,9 @@ function Login() {
             setError('An error occurred during login. Please try again later.');
         }
     };
+
+
+
 
     return (
         <section className="vh-20">
@@ -104,6 +119,8 @@ function Login() {
             </div>
         </section>
     );
+
+
 
 
 };

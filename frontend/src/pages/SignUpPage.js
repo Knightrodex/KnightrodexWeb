@@ -15,6 +15,16 @@ const SignUp = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const app_name = 'knightrodex-49dcc2a6c1ae'
+        function buildPath(route) {
+            if (process.env.NODE_ENV === 'production') {
+                return 'https://' + app_name + '.herokuapp.com/' + route;
+            }
+            else {
+                return 'http://localhost:5000/' + route;
+            }
+        }
+
         setIsPending(true);
         setIsPasswordValid(true);
         setIsEmailValid(true);
@@ -43,7 +53,7 @@ const SignUp = () => {
             };
 
             try {
-                const response = await fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/signup', {
+                const response = await fetch(buildPath('/api/signup'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
