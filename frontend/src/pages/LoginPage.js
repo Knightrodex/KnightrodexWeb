@@ -64,7 +64,6 @@ function Login() {
         }
 
 
-        const SignUp = () => {
             const [firstName, setFirstName] = useState('');
             const [lastName, setLastName] = useState('');
             const [email, setEmail] = useState('');
@@ -154,7 +153,6 @@ function Login() {
                 }
             }
         };
-    }
 
     const checkEmail = () => {
         var validRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
