@@ -18,7 +18,7 @@ exports.setApp = function ( app, client )
       const db = client.db('Knightrodex');
       const results = await db.collection('User').find({email:email,password:hashPassword}).toArray();
     
-      let id = -1;
+      let id = null;
       let em = '';
       let fn = '';
       let ln = '';
@@ -45,7 +45,7 @@ exports.setApp = function ( app, client )
         // outgoing: userID, first name, last name
 
         let error = '';
-        let newId = -1;
+        let newId = null;
 
         const {firstName, lastName, email, password} = req.body;
 
