@@ -18,10 +18,10 @@ const SignUp = () => {
         const app_name = 'knightrodex-49dcc2a6c1ae'
         function buildPath(route) {
             if (process.env.NODE_ENV === 'production') {
-                return 'https://' + app_name + '.herokuapp.com/' + route;
+                return 'https://' + app_name + '.herokuapp.com' + route;
             }
             else {
-                return 'http://localhost:5000/' + route;
+                return 'http://localhost:3000' + route;
             }
         }
 
@@ -51,9 +51,9 @@ const SignUp = () => {
                 email: email,
                 password: password1
             };
-
+//buildPath('/api/signup')
             try {
-                const response = await fetch(buildPath('/api/SignUp'), {
+                const response = await fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/signup', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -75,6 +75,8 @@ const SignUp = () => {
                         setLastName('');
                         setEmail('');
                         setPassword1('');
+                        window.location.href = buildPath('/');
+
                     }
                 } else {
                     // Handle registration failure here
@@ -85,7 +87,6 @@ const SignUp = () => {
                 setError('An error occurred during registration. Please try again later.');
             }
 
-            window.location.href = buildPath('/');
 
         }
     }

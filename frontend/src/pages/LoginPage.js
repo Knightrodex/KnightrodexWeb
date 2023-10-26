@@ -8,12 +8,12 @@ function Login() {
     const app_name = 'knightrodex-49dcc2a6c1ae'
     function buildPath(route) {
         if (process.env.NODE_ENV === 'production') {
-            return 'https://' + app_name + '.herokuapp.com/' + route;
+            return 'https://' + app_name + '.herokuapp.com' + route;
         }
         else {
-            return 'http://localhost:5000/' + route;
+            return 'http://localhost:3000' + route;
         }
-    }
+    } //  buildPath('/api/login')
 
 
     // State variables
@@ -31,7 +31,7 @@ function Login() {
         };
 
         try {
-            const response = await fetch(buildPath('/api/login'), {
+            const response = await fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
