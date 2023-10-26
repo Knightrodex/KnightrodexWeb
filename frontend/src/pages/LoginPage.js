@@ -63,7 +63,8 @@ function Login() {
                         </div>
                         <form style={{ width: '23rem' }} onSubmit={doLogin}>
                             <h3 className="fw-normal mb-3 pb-3" style={{ letterSpacing: '1px' }}>Log in</h3>
-                            <div className="form-outline mb-4">
+                            <div className="mb-4">
+                                <label className="form-label" htmlFor="form2Example18">Email address</label>
                                 <input
                                     type="email"
                                     id="form2Example18"
@@ -72,9 +73,9 @@ function Login() {
                                     value={loginUsername}
                                     onChange={(e) => setLoginUsername(e.target.value)}
                                 />
-                                <label className="form-label" htmlFor="form2Example18">Email address</label>
                             </div>
-                            <div className="form-outline mb-4">
+                            <div className="mb-4">
+                                <label className="form-label" htmlFor="form2Example28">Password</label>
                                 <input
                                     type="password"
                                     id="form2Example28"
@@ -83,7 +84,6 @@ function Login() {
                                     value={loginPassword}
                                     onChange={(e) => setLoginPassword(e.target.value)}
                                 />
-                                <label className="form-label" htmlFor="form2Example28">Password</label>
                             </div>
                             <div className="mb-4">
                                 <button className="btn btn-info btn-lg btn-block" type="submit">Login</button>
@@ -104,6 +104,7 @@ function Login() {
             </div>
         </section>
     );
+
 
 };
 export default Login;
