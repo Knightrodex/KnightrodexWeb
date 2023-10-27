@@ -77,4 +77,50 @@ exports.setApp = function ( app, client )
         let ret = {_id:newId, firstName:firstName, lastName:lastName, error:error};
         res.status(200).json(ret);
     })
+
+    /*
+    app.post('/api/add_badge_from_qr', (req, res) => {
+      const qrCodeDataURL = req.body.qrCodeDataURL; // Assuming the QR code data is sent in the request body
+      
+      qrCode.toData(qrCodeDataURL, (err, data) => {
+        if (err) {
+          return res.status(500).json({ success: false, message: "Error decoding QR code." });
+        }
+    
+        const badgeInfoJSON = data[0].toString();
+        const badgeInfo = JSON.parse(badgeInfoJSON);
+
+
+        
+      });
+    });
+    */
+
+    app.post('/api/badge', async (req, res) => {
+      const { userId, badgeId } = req.query;
+      const db = client.db('Knightrodex');
+      const badgeInfo = await db.collection('Badge').findOne({ badgeId });
+
+      const userCollection = db.collection('User');
+
+      try {
+        // Assuming you have a 'badges' collection
+          if (badgeInfo)
+          {
+            res.json(badgeInfo);
+
+            userCollection.updateOne(
+              { _id: userId },
+              { $push: {badgesObtained: badgeId} })
+          }
+          else
+          {
+            res.status(404).json({ message: 'Badge not found'});
+          }
+        }
+        catch (error){
+          console.error(error);
+          res.status(500).json({error: 'Internal server error'});
+        }
+    });
 }
