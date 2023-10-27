@@ -53,7 +53,7 @@ exports.setApp = function ( app, client )
 
         const newUser = {password:hashPassword, email:email, badgesObtained:[], 
                          firstName:firstName, lastName:lastName, profilePicture:null, 
-                         usersFollowed:null, dateCreated:(new Date())};
+                         usersFollowed:[], dateCreated:(new Date())};
 
         try
         {
@@ -79,38 +79,65 @@ exports.setApp = function ( app, client )
         res.status(200).json(ret);
     });
 
-    app.post('/api/badge', async (req, res, next) => {
+    app.post('/api/addbadge', async (req, res, next) => 
+    {
+      // incoming: userId, badgeId
+      // outgoing: badgeId, dateObtained, uniqueNumber
+
       const { userId, badgeId } = req.body;
-      console.log(req.body);
-      console.log(userId);
-      console.log(badgeId);
-      const db = client.db('Knightrodex');
-      const badgeInfo = await db.collection('Badge').find({ _id: new ObjectId(badgeId) }).toArray();
-      console.log(badgeInfo);
 
-      const userCollection = db.collection('User');
+      if (!ObjectId.isValid(userId))
+      {
+        res.status(500).json({error:"userId is not a valid ObjectId"});
+        return;
+      }
 
-      try {
-        // Assuming you have a 'badges' collection
-          if (badgeInfo)
+      if (!ObjectId.isValid(badgeId))
+      {
+        res.status(500).json({error:"badgeId is not a valid ObjectId"});
+        return;
+      }
+      
+      try 
+      {
+          const db = client.db('Knightrodex');
+          const badgeCollection = db.collection('Badge');
+          const userCollection = db.collection('User');
+
+          const badgeInfo = await badgeCollection.findOne({ _id: new ObjectId(badgeId) });
+          const userInfo = await userCollection.findOne({ _id: new ObjectId(userId) });
+
+          if (badgeInfo == null)
           {
-            const badgeToAdd = {badgeId: new ObjectId(badgeId), dateObtained: new Date(), uniqueNumber: 1};
-            const userInfo = await db.collection('User').find({ _id: new ObjectId(userId) }).toArray();
-            console.log(userInfo);
+            res.status(404).json({error: "Badge not found"});
+            return;
+          }
+
+          if (userInfo == null)
+          {
+            res.status(404).json({error: "User not found"})
+            return;
+          }
+
+          if (badgeInfo.numObtained < badgeInfo.limit)
+          {
+            const badgeToAdd = {badgeId: new ObjectId(badgeId), dateObtained: new Date(), uniqueNumber: 1}; // CHANGE UNIQUE NUMBER
             userCollection.updateOne(
               { _id: new ObjectId(userId) },
               { $push: {"badgesObtained": badgeToAdd }})
+              
+              // Increment badge's numObtained
 
-              res.json(badgeInfo);
+              res.status(200).json(badgeToAdd);
           }
           else
           {
-            res.status(404).json({ message: 'Badge not found'});
+            res.status(200).json({ error: 'Badge limit exceeded'});
           }
         }
-        catch (error){
-          console.error(error);
-          res.status(500).json({error: 'Internal server error'});
+        catch (error)
+        {
+          res.status(500).json({error: error.toString()});
         }
     });
 }
