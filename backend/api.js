@@ -1,3 +1,5 @@
+const { ObjectId } = require('mongodb');
+var md5 = require('./md5')
 require('express');
 require('mongodb');
 
@@ -11,11 +13,12 @@ exports.setApp = function ( app, client )
       let error = '';
     
       const { email, password } = req.body;
+      let hashPassword = md5(password);
     
       const db = client.db('Knightrodex');
-      const results = await db.collection('User').find({email:email,password:password}).toArray();
+      const results = await db.collection('User').find({email:email,password:hashPassword}).toArray();
     
-      let id = -1;
+      let id = null;
       let em = '';
       let fn = '';
       let ln = '';
@@ -29,7 +32,7 @@ exports.setApp = function ( app, client )
       }
       else
       {
-        error = 'Invalid credentials'
+        error = 'Invalid credentials';
       }
     
       let ret = { _id:id, email: em, firstName:fn, lastName:ln, error:error};
@@ -42,18 +45,30 @@ exports.setApp = function ( app, client )
         // outgoing: userID, first name, last name
 
         let error = '';
-        let newId = -1;
+        let newId = null;
 
         const {firstName, lastName, email, password} = req.body;
-        const newUser = {password:password, email:email, badgesObtained:null, 
+
+        const hashPassword = md5(password);
+
+        const newUser = {password:hashPassword, email:email, badgesObtained:[], 
                          firstName:firstName, lastName:lastName, profilePicture:null, 
-                         usersFollowed:null, dateCreated:(new Date())};
+                         usersFollowed:[], dateCreated:(new Date())};
 
         try
         {
           const db = client.db('Knightrodex');
-          const result = await db.collection('User').insertOne(newUser);
-          newId = result.insertedId;
+
+          const existingUser = await db.collection('User').find({email:email}).toArray();
+          if (existingUser.length > 0)
+          {
+            error = 'User with the given email already exists';
+          }
+          else
+          {
+            const result = await db.collection('User').insertOne(newUser);
+            newId = result.insertedId;
+          }
         }
         catch (e)
         {
@@ -62,5 +77,67 @@ exports.setApp = function ( app, client )
 
         let ret = {_id:newId, firstName:firstName, lastName:lastName, error:error};
         res.status(200).json(ret);
-    })
+    });
+
+    app.post('/api/addbadge', async (req, res, next) => 
+    {
+      // incoming: userId, badgeId
+      // outgoing: badgeId, dateObtained, uniqueNumber
+
+      const { userId, badgeId } = req.body;
+
+      if (!ObjectId.isValid(userId))
+      {
+        res.status(500).json({error:"userId is not a valid ObjectId"});
+        return;
+      }
+
+      if (!ObjectId.isValid(badgeId))
+      {
+        res.status(500).json({error:"badgeId is not a valid ObjectId"});
+        return;
+      }
+      
+      try 
+      {
+          const db = client.db('Knightrodex');
+          const badgeCollection = db.collection('Badge');
+          const userCollection = db.collection('User');
+
+          const badgeInfo = await badgeCollection.findOne({ _id: new ObjectId(badgeId) });
+          const userInfo = await userCollection.findOne({ _id: new ObjectId(userId) });
+
+          if (badgeInfo == null)
+          {
+            res.status(404).json({error: "Badge not found"});
+            return;
+          }
+
+          if (userInfo == null)
+          {
+            res.status(404).json({error: "User not found"})
+            return;
+          }
+
+          if (badgeInfo.numObtained < badgeInfo.limit)
+          {
+            const badgeToAdd = {badgeId: new ObjectId(badgeId), dateObtained: new Date(), uniqueNumber: 1}; // CHANGE UNIQUE NUMBER
+            userCollection.updateOne(
+              { _id: new ObjectId(userId) },
+              { $push: {"badgesObtained": badgeToAdd }})
+              
+              // Increment badge's numObtained
+
+              res.status(200).json(badgeToAdd);
+          }
+          else
+          {
+            res.status(200).json({ error: 'Badge limit exceeded'});
+          }
+        }
+        catch (error)
+        {
+          res.status(500).json({error: error.toString()});
+        }
+    });
 }
