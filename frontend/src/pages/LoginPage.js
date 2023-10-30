@@ -103,7 +103,7 @@ function Login() {
                             <div className="mb-4">
                                 <button className="btn btn-info btn-lg btn-block" type="submit">Login</button>
                             </div>
-                            <p className="small mb-5 pb-lg-2"><a className="text-muted" href="#!">Forgot password?</a></p>
+                            <p className="small mb-5 pb-lg-2"><a className="text-muted" href={buildPath('/HomePage')}>Forgot password?</a></p>
                             <p>Don't have an account? <a href={buildPath('/SignUp')} className="link-info">Register here</a></p>
                         </form>
                     </div>
