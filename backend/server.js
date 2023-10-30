@@ -36,7 +36,7 @@ app.listen(PORT, () => {
 if (process.env.NODE_ENV === 'production') 
 {
   // Set static folder
-  app.use(express.static('frontend/build'));
+  app.use(express.static('../frontend/build'));
 
   app.get('*', (req, res) => 
   {
