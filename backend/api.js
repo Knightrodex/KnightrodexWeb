@@ -164,7 +164,7 @@ exports.setApp = function ( app, client )
         }
     });
 
-    // TO-DO
+    // TO-DO: Return correct values
     app.post('/api/showuserprofile', async (req, res) => 
     {
       // incoming: userId
@@ -384,5 +384,58 @@ exports.setApp = function ( app, client )
         res.status(500).json(response);
       }
       
+    });
+
+    app.post('/api/gethints', async (req, res) =>
+    {
+      // incoming: userId
+      // outgoing: array of hints for badges user does not have
+
+      const userId = req.body.userId;
+
+      let response = {hints: [], error: ''};
+
+      // Verify userId is a valid ObjectId
+      if (!ObjectId.isValid(userId))
+      {
+        response.error = 'userId is not a valid ObjectId';
+        res.status(500).json(response);
+        return;
+      }
+
+      const db = client.db('Knightrodex');
+      const userCollection = db.collection('User');
+      const user = await userCollection.findOne({_id: new ObjectId(userId)});
+      const badgeCollection = db.collection('Badge');
+      const allBadges = await badgeCollection.find().toArray(); // Return all badges in collection as array
+
+      // Verify User exists in database
+      if (user == null)
+      {
+        response.error = 'User Not Found';
+        res.status(404).json(response);
+        return;
+      }
+
+      try
+      {
+        // Iterate through all the badges in the Badge collection
+        allBadges.forEach(badge =>
+          {
+            // If the user does not have the badge, add the badge's hint to the response
+            if (!user.badgesObtained.some(userBadge => userBadge.badgeId.equals(badge._id)))
+            {
+              response.hints.push(badge.hint);
+            }
+          });
+
+          res.status(200).json(response);
+      }
+      catch (error)
+      {
+        response.error = error.toString();
+        res.status(500).json(response);
+      }
+
     });
 }
