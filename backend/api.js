@@ -148,7 +148,7 @@ exports.setApp = function ( app, client )
 
       const db = client.db('Knightrodex');
       const userCollection = db.collection('User');
-      const user = await userCollection.findOne({ _id: new ObjectId(userId) }); // does this need to be swapped?
+      const user = await userCollection.findOne({ _id: new ObjectId(userId) });
       console.log(userId);
 
       if (!user) {
@@ -185,5 +185,20 @@ exports.setApp = function ( app, client )
         console.error(error);
         res.status(500).json({ message: 'Internal Server Error'});
       }
+    })
+
+    app.post('/api/followuser', async (req, res) => {
+      const db = client.db('Knightrodex');
+      const userCollection = db.collection('User');
+
+      const { currentUser, otherUser } = req.body;
+      const currentUserId = await userCollection.findOne({ _id: new ObjectId(currentUser) });
+      const otherUserId = await userCollection.findOne({ _id: new ObjectId(otherUser) });
+
+      // if statements to check if current user exists
+      // if statement to check if other user exists
+      // add other user to current user an then return 200
+      // else return fail
+
     })
 }
