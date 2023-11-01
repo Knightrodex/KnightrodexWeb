@@ -164,8 +164,12 @@ exports.setApp = function ( app, client )
         }
     });
 
+    // TO-DO
     app.post('/api/showuserprofile', async (req, res) => 
     {
+      // incoming: userId
+      // outgoing: userId, first/last name, pfp, usersFollowing, badges collected
+
       const userId  = req.body._id;
       let error = '';
 
@@ -182,10 +186,8 @@ exports.setApp = function ( app, client )
 
       if (user == null) 
       {
-        res.status(404).json({error: 'userId not found'})
-        return;
+        error = 'User Not Found';
       }
-
       
       const response = {
         userId: user?._id || null,
@@ -203,34 +205,57 @@ exports.setApp = function ( app, client )
 
     app.post('/api/searchemail', async (req, res) => 
     {
+      // incoming: email (partial)
+      // outgoing: all user info whose email matches partial email
+
+      const partialEmail = req.body.email;
+
       const db = client.db('Knightrodex');
       const collection = db.collection('User');
-      const partialEmail = req.body.email;
+
+      let response = {result: [], error: ''};
 
       try 
       {
         const result = await collection.find({ email: { $regex: `${partialEmail}`, $options: 'i'}}).toArray();
-        res.json(result);
+        response.result = result;
+        res.status(200).json(response);
       }
       catch (error) 
       {
-        res.status(500).json({ error: error.toString()});
+        response.error = error.toString();
+        res.status(500).json(response);
       }
     });
 
     app.post('/api/followuser', async (req, res) => 
     {
+      // incoming: currentUserId, otherUserId
+      // outgoing: success boolean
+
       const { currentUserId, otherUserId } = req.body;
+
+      let response = {success: false, error: ''};
 
       // Verify User IDs are valid ObjectIds
       if (!ObjectId.isValid(currentUserId))
       {
-        res.status(500).json({error: 'currentUser is not a valid ObjectId'});
+        response.error = 'currentUserId is not a valid ObjectId';
+        res.status(500).json(response);
         return;
       }
       else if (!ObjectId.isValid(otherUserId))
       {
-        res.status(500).json({error: 'otherUser is not a valid ObjectId'});
+        response.error = 'otherUserId is not a valid ObjectId';
+        res.status(500).json(response);
+        return;
+      }
+
+      // Ensure user does not try to follow themself
+      if (currentUserId === otherUserId)
+      {
+        response.error = 'currentUserId cannot equal otherUserId';
+        res.status(500).json(response);
         return;
       }
 
@@ -238,41 +263,47 @@ exports.setApp = function ( app, client )
       const userCollection = db.collection('User');
 
       // Find both users in the collection
-      const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUser) });
-      const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUser) });
+      const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
+      const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
 
       // Verify both users exist in database
       if (currentUser == null)
       {
-        res.status(500).json({error: 'Current User Not Found'});
+        response.error = 'Current User Not Found';
+        res.status(500).json(response);
         return;
       }
       else if (otherUser == null)
       {
-        res.status(500).json({error: 'Other User Not Found'});
+        response.error = 'Other User Not Found'
+        res.status(500).json(response);
         return;
       }
 
-      // If current user is not following other user, add other user to current user's usersFollowed list
-      if (currentUser.usersFollowed.includes(new ObjectId(otherUser)))
+      try
       {
-        res.status(200).json({message: 'Current User Already Follows Other User'});
+        // If current user is not following other user, add other user to current user's usersFollowed list
+        if (currentUser.usersFollowed.some(userId => userId.equals(otherUserId)))
+        {
+          response.error = 'Current User Already Follows Other User';
+          res.status(200).json(response);
+        }
+        else
+        {
+          userCollection.updateOne(
+            { _id: new ObjectId(currentUserId) },
+            { $push: {"usersFollowed": new ObjectId(otherUserId)}}
+          );
+
+          response.success = true;
+          res.status(200).json(response);
+        }
       }
-      else
+      catch (error)
       {
-        const userToAdd = {_id: new ObjectId(otherUserId)};
-        userCollection.updateOne(
-          { _id: new ObjectId(currentUserId) },
-          { $push: {"usersFollowed": userToAdd}}
-        );
+        response.error = error.toString();
+        res.status(500).json(response);
       }
-
-
-
-      // if statements to check if current user exists
-      // if statement to check if other user exists
-      // add other user to current user an then return 200
-      // else return fail
-
+      
     });
 }
