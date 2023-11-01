@@ -144,7 +144,6 @@ exports.setApp = function ( app, client )
 
     app.post('/api/showuserprofile', async (req, res) => {
       const userId  = req.body._id;
-      console.log(userId);
       let error = '';
 
       const db = client.db('Knightrodex');
@@ -169,5 +168,22 @@ exports.setApp = function ( app, client )
       };
 
       res.status(200).json(response);
+    })
+
+    app.post('/api/searchemail', async (req, res) => {
+      const db = client.db('Knightrodex');
+      const collection = db.collection('User');
+      const partialEmail = req.body.email;
+
+      try 
+      {
+        const result = await collection.find({ email: { $regex: `${partialEmail}`, $options: 'i'}}).toArray();
+        res.json(result);
+      }
+      catch (error) 
+      {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error'});
+      }
     })
 }
