@@ -1,11 +1,10 @@
 const { ObjectId } = require('mongodb');
-var md5 = require('./md5')
 require('express');
 require('mongodb');
 
 exports.setApp = function ( app, client ) 
 {
-    app.post('/api/login', async (req, res, next) => 
+    app.post('/api/login', async (req, res) => 
     {
       // incoming: login, password
       // outgoing: id, firstName, lastName, error
@@ -13,10 +12,9 @@ exports.setApp = function ( app, client )
       let error = '';
     
       const { email, password } = req.body;
-      let hashPassword = md5(password);
     
       const db = client.db('Knightrodex');
-      const results = await db.collection('User').find({email:email,password:hashPassword}).toArray();
+      const results = await db.collection('User').find({email:email,password:password}).toArray();
     
       let id = null;
       let em = '';
@@ -39,7 +37,7 @@ exports.setApp = function ( app, client )
       res.status(200).json(ret);
     });
 
-    app.post('/api/signup', async (req, res, next) =>
+    app.post('/api/signup', async (req, res) =>
     {
         // incoming: first name, last name, email, password
         // outgoing: userID, first name, last name
@@ -49,9 +47,7 @@ exports.setApp = function ( app, client )
 
         const {firstName, lastName, email, password} = req.body;
 
-        const hashPassword = md5(password);
-
-        const newUser = {password:hashPassword, email:email, badgesObtained:[], 
+        const newUser = {password:password, email:email, badgesObtained:[], 
                          firstName:firstName, lastName:lastName, profilePicture:null, 
                          usersFollowed:[], dateCreated:(new Date())};
 
@@ -79,22 +75,26 @@ exports.setApp = function ( app, client )
         res.status(200).json(ret);
     });
 
-    app.post('/api/addbadge', async (req, res, next) => 
+    app.post('/api/addbadge', async (req, res) => 
     {
       // incoming: userId, badgeId
       // outgoing: badgeId, dateObtained, uniqueNumber
+
+      let response = {badgeId: null, dateObtained: null, uniqueNumber: null, error: ''};
 
       const { userId, badgeId } = req.body;
 
       if (!ObjectId.isValid(userId))
       {
-        res.status(500).json({error:"userId is not a valid ObjectId"});
+        response.error = 'userId is not a valid ObjectId'
+        res.status(500).json(response);
         return;
       }
 
       if (!ObjectId.isValid(badgeId))
       {
-        res.status(500).json({error:"badgeId is not a valid ObjectId"});
+        response.error = 'badgeId is not a valid ObjectId'
+        res.status(500).json(response);
         return;
       }
       
@@ -107,52 +107,83 @@ exports.setApp = function ( app, client )
           const badgeInfo = await badgeCollection.findOne({ _id: new ObjectId(badgeId) });
           const userInfo = await userCollection.findOne({ _id: new ObjectId(userId) });
 
+          // Verify User and Badge exist in database
           if (badgeInfo == null)
           {
-            res.status(404).json({error: "Badge not found"});
+            response.error = 'Badge not Found';
+            res.status(404).json(response);
             return;
           }
-
-          if (userInfo == null)
+          else if (userInfo == null)
           {
-            res.status(404).json({error: "User not found"})
+            response.error = 'User not found';
+            res.status(404).json(response);
             return;
           }
 
+          // Verify badge hasn't been collected to its limit
           if (badgeInfo.numObtained < badgeInfo.limit)
           {
-            // increment badge count in the badge collection then add to badgeToAdd
-            const badgeToAdd = {badgeId: new ObjectId(badgeId), dateObtained: new Date(), uniqueNumber: 1}; // CHANGE UNIQUE NUMBER
+            const badgeToAdd = {badgeId: new ObjectId(badgeId), dateObtained: new Date(), uniqueNumber: (badgeInfo.numObtained + 1)};
+
+            // Ensure User does not add a badge they already have
+            if (userInfo.badgesObtained.some(badge => badge.badgeId.equals(badgeToAdd.badgeId)))
+            {
+              response.error = 'User already has Badge';
+              res.status(200).json(response);
+              return;
+            }
+
+            // Update response values
+            response.badgeId = badgeToAdd.badgeId;
+            response.dateObtained = badgeToAdd.dateObtained;
+            response.uniqueNumber = badgeToAdd.uniqueNumber;
+            
+            // Add badge to user's badge collection list
             userCollection.updateOne(
               { _id: new ObjectId(userId) },
-              { $push: {"badgesObtained": badgeToAdd }})
-              
-              // Increment badge's numObtained
+              { $push: {"badgesObtained": badgeToAdd }});
 
-              res.status(200).json(badgeToAdd);
+            // Increment the numObtained for the given badge
+            badgeCollection.updateOne(
+              { _id: new ObjectId(badgeId) },
+              { $set: {"numObtained": (badgeInfo.numObtained + 1)}});
+
+              res.status(200).json(response);
           }
           else
           {
-            res.status(200).json({ error: 'Badge limit exceeded'});
+            response.error = 'Badge collection limit exceeded';
+            res.status(200).json(response);
           }
         }
         catch (error)
         {
-          res.status(500).json({error: error.toString()});
+          response.error = error.toString();
+          res.status(500).json(response);
         }
     });
 
-    app.post('/api/showuserprofile', async (req, res) => {
+    app.post('/api/showuserprofile', async (req, res) => 
+    {
       const userId  = req.body._id;
       let error = '';
+
+      // Verify userId is a valid ObjectId
+      if (!ObjectId.isValid(userId))
+      {
+        res.status(500).json({error: 'userId is not a valid ObjectId'});
+        return;
+      }
 
       const db = client.db('Knightrodex');
       const userCollection = db.collection('User');
       const user = await userCollection.findOne({ _id: new ObjectId(userId) });
-      console.log(userId);
 
-      if (!user) {
-        error = 'User Not Found';
+      if (user == null) 
+      {
+        res.status(404).json({error: 'userId not found'})
+        return;
       }
 
       
@@ -170,7 +201,8 @@ exports.setApp = function ( app, client )
       res.status(200).json(response);
     })
 
-    app.post('/api/searchemail', async (req, res) => {
+    app.post('/api/searchemail', async (req, res) => 
+    {
       const db = client.db('Knightrodex');
       const collection = db.collection('User');
       const partialEmail = req.body.email;
@@ -182,23 +214,65 @@ exports.setApp = function ( app, client )
       }
       catch (error) 
       {
-        console.error(error);
-        res.status(500).json({ message: 'Internal Server Error'});
+        res.status(500).json({ error: error.toString()});
       }
-    })
+    });
 
-    app.post('/api/followuser', async (req, res) => {
+    app.post('/api/followuser', async (req, res) => 
+    {
+      const { currentUserId, otherUserId } = req.body;
+
+      // Verify User IDs are valid ObjectIds
+      if (!ObjectId.isValid(currentUserId))
+      {
+        res.status(500).json({error: 'currentUser is not a valid ObjectId'});
+        return;
+      }
+      else if (!ObjectId.isValid(otherUserId))
+      {
+        res.status(500).json({error: 'otherUser is not a valid ObjectId'});
+        return;
+      }
+
       const db = client.db('Knightrodex');
       const userCollection = db.collection('User');
 
-      const { currentUser, otherUser } = req.body;
-      const currentUserId = await userCollection.findOne({ _id: new ObjectId(currentUser) });
-      const otherUserId = await userCollection.findOne({ _id: new ObjectId(otherUser) });
+      // Find both users in the collection
+      const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUser) });
+      const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUser) });
+
+      // Verify both users exist in database
+      if (currentUser == null)
+      {
+        res.status(500).json({error: 'Current User Not Found'});
+        return;
+      }
+      else if (otherUser == null)
+      {
+        res.status(500).json({error: 'Other User Not Found'});
+        return;
+      }
+
+      // If current user is not following other user, add other user to current user's usersFollowed list
+      if (currentUser.usersFollowed.includes(new ObjectId(otherUser)))
+      {
+        res.status(200).json({message: 'Current User Already Follows Other User'});
+      }
+      else
+      {
+        const userToAdd = {_id: new ObjectId(otherUserId)};
+        userCollection.updateOne(
+          { _id: new ObjectId(currentUserId) },
+          { $push: {"usersFollowed": userToAdd}}
+        );
+      }
+
+
 
       // if statements to check if current user exists
       // if statement to check if other user exists
       // add other user to current user an then return 200
       // else return fail
 
-    })
+    });
 }
