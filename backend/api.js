@@ -306,4 +306,83 @@ exports.setApp = function ( app, client )
       }
       
     });
+
+    app.post('/api/unfollowuser', async (req, res) => 
+    {
+      // incoming: currentUserId, otherUserId
+      // outgoing: success boolean
+
+      const { currentUserId, otherUserId } = req.body;
+
+      let response = {success: false, error: ''};
+
+      // Verify User IDs are valid ObjectIds
+      if (!ObjectId.isValid(currentUserId))
+      {
+        response.error = 'currentUserId is not a valid ObjectId';
+        res.status(500).json(response);
+        return;
+      }
+      else if (!ObjectId.isValid(otherUserId))
+      {
+        response.error = 'otherUserId is not a valid ObjectId';
+        res.status(500).json(response);
+        return;
+      }
+
+      // Ensure user does not try to unfollow themself
+      if (currentUserId === otherUserId)
+      {
+        response.error = 'currentUserId cannot equal otherUserId';
+        res.status(500).json(response);
+        return;
+      }
+
+      const db = client.db('Knightrodex');
+      const userCollection = db.collection('User');
+
+      // Find both users in the collection
+      const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
+      const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
+
+      // Verify both users exist in database
+      if (currentUser == null)
+      {
+        response.error = 'Current User Not Found';
+        res.status(500).json(response);
+        return;
+      }
+      else if (otherUser == null)
+      {
+        response.error = 'Other User Not Found'
+        res.status(500).json(response);
+        return;
+      }
+
+      try
+      {
+        // If current user is not following other user, add other user to current user's usersFollowed list
+        if (currentUser.usersFollowed.some(userId => userId.equals(otherUserId)))
+        {
+          userCollection.updateOne(
+            { _id: new ObjectId(currentUserId) },
+            { $pull: {"usersFollowed": new ObjectId(otherUserId)}}
+          );
+
+          response.success = true;
+          res.status(200).json(response);
+        }
+        else
+        {
+          response.error = 'Current User is not Following Other User';
+          res.status(200).json(response);
+        }
+      }
+      catch (error)
+      {
+        response.error = error.toString();
+        res.status(500).json(response);
+      }
+      
+    });
 }
