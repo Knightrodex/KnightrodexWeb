@@ -121,6 +121,7 @@ exports.setApp = function ( app, client )
 
           if (badgeInfo.numObtained < badgeInfo.limit)
           {
+            // increment badge count in the badge collection then add to badgeToAdd
             const badgeToAdd = {badgeId: new ObjectId(badgeId), dateObtained: new Date(), uniqueNumber: 1}; // CHANGE UNIQUE NUMBER
             userCollection.updateOne(
               { _id: new ObjectId(userId) },
@@ -140,4 +141,33 @@ exports.setApp = function ( app, client )
           res.status(500).json({error: error.toString()});
         }
     });
+
+    app.post('/api/showuserprofile', async (req, res) => {
+      const userId  = req.body._id;
+      console.log(userId);
+      let error = '';
+
+      const db = client.db('Knightrodex');
+      const userCollection = db.collection('User');
+      const user = await userCollection.findOne({ _id: new ObjectId(userId) }); // does this need to be swapped?
+      console.log(userId);
+
+      if (!user) {
+        error = 'User Not Found';
+      }
+
+      
+      const response = {
+        userId: user?._id || null,
+        firstName: user?.firstName || null,
+        lastName: user?.lastName || null,
+        profilePicture: user?.profilePicture || null,
+        usersFollowed: user?.usersFollowed || [],
+        badgesInfo: user?.badgesInfo || [],
+        collectedBadges: user?.collectedBadges || [],
+        error: error
+      };
+
+      res.status(200).json(response);
+    })
 }
