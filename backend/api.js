@@ -386,7 +386,7 @@ exports.setApp = function ( app, client )
       
     });
 
-    app.post('/api/gethints', async (req, res) =>
+    app.post('/api/gethints', async (req, res) => 
     {
       // incoming: userId
       // outgoing: array of hints for badges user does not have
@@ -420,16 +420,90 @@ exports.setApp = function ( app, client )
       try
       {
         // Iterate through all the badges in the Badge collection
-        allBadges.forEach(badge =>
+        for (const badge of allBadges)
+        {
+          // If the user does not have the badge, add the badge's hint to the response
+          if (!user.badgesObtained.some(userBadge => userBadge.badgeId.equals(badge._id)))
           {
-            // If the user does not have the badge, add the badge's hint to the response
-            if (!user.badgesObtained.some(userBadge => userBadge.badgeId.equals(badge._id)))
-            {
-              response.hints.push(badge.hint);
-            }
-          });
+            response.hints.push(badge.hint);
+          }
+        };
 
           res.status(200).json(response);
+      }
+      catch (error)
+      {
+        response.error = error.toString();
+        res.status(500).json(response);
+      }
+
+    });
+
+    app.post('/api/getactivity', async (req, res) => 
+    {
+      const userId = req.body.userId;
+
+      let response = {activity: [], error: ''};
+
+      // Verify userId is valid ObjectId
+      if (!ObjectId.isValid(userId))
+      {
+        response.error = 'userId is not a valid ObjectId';
+        res.status(500).json(response);
+        return;
+      }
+
+      const db = client.db('Knightrodex');
+      const userCollection = db.collection('User');
+      const currUser = await userCollection.findOne({ _id: new ObjectId(userId) });
+
+      if (currUser == null)
+      {
+        response.error = 'User Not Found';
+        res.status(500).json(response);
+        return;
+      }
+
+      try
+      {
+        // Iterate through all followed users
+        for (const followedUserId of currUser.usersFollowed) 
+        {
+          // Verify followedUserId is a valid ObjectId
+          if (!ObjectId.isValid(followedUserId))
+          {
+            response.error = 'Followed User ID not a valid ObjectId'
+            res.status(500).json(response);
+            return;
+          }
+
+          const followedUser = await userCollection.findOne({ _id: followedUserId });
+
+          // Verify Followed User is in database
+          if (followedUser == null)
+          {
+            response.error = 'Followed User Not Found';
+            res.status(500).json(response);
+            return;
+          }
+
+          // Iterate through the followed user's badges and add data to the activity list
+          for (const badgeCollected of followedUser.badgesObtained)
+          {
+            const activityInfo = {firstName: followedUser.firstName, lastName: followedUser.lastName,
+                                  badgeId: badgeCollected.badgeId, dateObtained: badgeCollected.dateObtained};
+            response.activity.push(activityInfo);
+          };
+
+          // Sort the data based on the date the badge was obtained (reverse chronological order)
+          response.activity.sort((a, b) =>
+          {
+            return b.dateObtained - a.dateObtained;
+          })
+        };
+
+        res.status(200).json(response);
+
       }
       catch (error)
       {
