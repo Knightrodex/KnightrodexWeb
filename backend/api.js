@@ -9,32 +9,26 @@ exports.setApp = function ( app, client )
       // incoming: login, password
       // outgoing: id, firstName, lastName, error
     
-      let error = '';
-    
       const { email, password } = req.body;
+
+      let response = {userId: null, email: '', firstName: '', lastName: '', error: ''};
     
       const db = client.db('Knightrodex');
-      const results = await db.collection('User').find({email:email,password:password}).toArray();
-    
-      let id = null;
-      let em = '';
-      let fn = '';
-      let ln = '';
+      const user = await db.collection('User').findOne({email:email,password:password});
       
-      if( results.length > 0 )
+      if(user != null)
       {
-        em = results[0].email;
-        id = results[0]._id;
-        fn = results[0].firstName;
-        ln = results[0].lastName;
+        response.userId = user._id;
+        response.email = user.email;
+        response.firstName = user.firstName;
+        response.lastName = user.lastName;
       }
       else
       {
-        error = 'Invalid credentials';
+        response.error = 'Invalid credentials';
       }
-    
-      let ret = { _id:id, email: em, firstName:fn, lastName:ln, error:error};
-      res.status(200).json(ret);
+
+      res.status(200).json(response);
     });
 
     app.post('/api/signup', async (req, res) => 
@@ -42,10 +36,9 @@ exports.setApp = function ( app, client )
         // incoming: first name, last name, email, password
         // outgoing: userID, first name, last name
 
-        let error = '';
-        let newId = null;
-
         const {firstName, lastName, email, password} = req.body;
+
+        let response = {userId: null, firstName: '', lastName: '', error: ''};
 
         const newUser = {password:password, email:email, badgesObtained:[], 
                          firstName:firstName, lastName:lastName, profilePicture:null, 
@@ -55,24 +48,25 @@ exports.setApp = function ( app, client )
         {
           const db = client.db('Knightrodex');
 
-          const existingUser = await db.collection('User').find({email:email}).toArray();
-          if (existingUser.length > 0)
+          const existingUser = await db.collection('User').findOne({email:email});
+          if (existingUser != null)
           {
-            error = 'User with the given email already exists';
+            response.error = 'User with the given email already exists';
           }
           else
           {
             const result = await db.collection('User').insertOne(newUser);
-            newId = result.insertedId;
+            response.userId = result.insertedId;
+            response.firstName = firstName;
+            response.lastName = lastName;
           }
         }
         catch (e)
         {
-          error = e.toString();
+          response.error = e.toString();
         }
 
-        let ret = {_id:newId, firstName:firstName, lastName:lastName, error:error};
-        res.status(200).json(ret);
+        res.status(200).json(response);
     });
 
     app.post('/api/addbadge', async (req, res) => 
@@ -84,14 +78,14 @@ exports.setApp = function ( app, client )
 
       const { userId, badgeId } = req.body;
 
+      // Verify IDs are valid Object IDs
       if (!ObjectId.isValid(userId))
       {
         response.error = 'userId is not a valid ObjectId'
         res.status(500).json(response);
         return;
       }
-
-      if (!ObjectId.isValid(badgeId))
+      else if (!ObjectId.isValid(badgeId))
       {
         response.error = 'badgeId is not a valid ObjectId'
         res.status(500).json(response);
@@ -111,13 +105,13 @@ exports.setApp = function ( app, client )
           if (badgeInfo == null)
           {
             response.error = 'Badge not Found';
-            res.status(404).json(response);
+            res.status(500).json(response);
             return;
           }
           else if (userInfo == null)
           {
             response.error = 'User not found';
-            res.status(404).json(response);
+            res.status(500).json(response);
             return;
           }
 
@@ -460,7 +454,7 @@ exports.setApp = function ( app, client )
       if (user == null)
       {
         response.error = 'User Not Found';
-        res.status(404).json(response);
+        res.status(500).json(response);
         return;
       }
 
