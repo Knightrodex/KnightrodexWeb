@@ -37,7 +37,7 @@ exports.setApp = function ( app, client )
       res.status(200).json(ret);
     });
 
-    app.post('/api/signup', async (req, res) =>
+    app.post('/api/signup', async (req, res) => 
     {
         // incoming: first name, last name, email, password
         // outgoing: userID, first name, last name
@@ -164,14 +164,23 @@ exports.setApp = function ( app, client )
         }
     });
 
-    // TO-DO: Return correct values
     app.post('/api/showuserprofile', async (req, res) => 
     {
       // incoming: userId
-      // outgoing: userId, first/last name, pfp, usersFollowing, badges collected
+      // outgoing: userId, first/last name, pfp, usersFollowing, info about badges collected
 
-      const userId  = req.body._id;
-      let error = '';
+      const userId  = req.body.userId;
+      
+      let response = {
+        userId: null,
+        firstName: '',
+        lastName: '',
+        profilePicture: '',
+        usersFollowed: [],
+        dateCreated: null,
+        badgesCollected: [],
+        error: ''
+      }
 
       // Verify userId is a valid ObjectId
       if (!ObjectId.isValid(userId))
@@ -182,26 +191,64 @@ exports.setApp = function ( app, client )
 
       const db = client.db('Knightrodex');
       const userCollection = db.collection('User');
+      const badgeCollection = db.collection('Badge');
       const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
       if (user == null) 
       {
-        error = 'User Not Found';
+        response.error = 'User Not Found';
+        res.status(500).json(response);
+        return;
+      }
+
+      try
+      {
+        response.userId = user._id;
+        response.firstName = user.firstName;
+        response.lastName = user.lastName;
+        response.profilePicture = user.profilePicture;
+        response.usersFollowed = user.usersFollowed;
+        response.dateCreated = user.dateCreated;
+
+        // Iterate through all of the user's collected badges
+        for (const badgeCollected of user.badgesObtained)
+        {
+          const badgeInfo = await badgeCollection.findOne({ _id: badgeCollected.badgeId });
+
+          // Verify badge is in database
+          if (badgeInfo == null)
+          {
+            response.error = 'Badge Not Found';
+            res.status(500).json(response);
+            return;
+          }
+
+          // Add any relevant information about the badge
+          const badgeCollectedInfo = {
+            _id: badgeInfo._id,
+            title: badgeInfo.title,
+            location: badgeInfo.collection,
+            dateCreated: badgeInfo.dateCreated,
+            dateExpired: badgeInfo.dateExpired,
+            description: badgeInfo.description,
+            limit: badgeInfo.limit,
+            badgeImage: badgeInfo.image,
+            dateObtained: badgeCollected.dateObtained,
+            uniqueNumber: badgeCollected.uniqueNumber
+          }
+
+          response.badgesCollected.push(badgeCollectedInfo);
+        }
+
+        res.status(200).json(response);
+      }
+      catch (error)
+      {
+        response.error = error.toString();
+        res.status(500).json(response);
       }
       
-      const response = {
-        userId: user?._id || null,
-        firstName: user?.firstName || null,
-        lastName: user?.lastName || null,
-        profilePicture: user?.profilePicture || null,
-        usersFollowed: user?.usersFollowed || [],
-        badgesInfo: user?.badgesInfo || [],
-        collectedBadges: user?.collectedBadges || [],
-        error: error
-      };
-
-      res.status(200).json(response);
-    })
+    });
 
     app.post('/api/searchemail', async (req, res) => 
     {
@@ -441,6 +488,9 @@ exports.setApp = function ( app, client )
 
     app.post('/api/getactivity', async (req, res) => 
     {
+      // incoming: userId
+      // outgoing: list of objects (name, badge, time) sorted in reverse chronological order
+
       const userId = req.body.userId;
 
       let response = {activity: [], error: ''};
