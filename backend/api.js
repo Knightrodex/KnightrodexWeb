@@ -5,13 +5,13 @@ require('mongodb');
 // Status Codes:
 // 200: Ok
 // 400: ID is not a valid ObjectId
-// 401: Invalid Login Credentials
+// 400: Invalid Login Credentials
 // 404: ID not found in database
-// 403: Badge has been collected to limit
-// 405: User already has badge in account
-// 406: User tries to follow/unfollow themself
-// 407: User already follows other user
-// 408: User is already not following other user
+// 500: Badge has been collected to limit
+// 500: User already has badge in account
+// 500: User tries to follow/unfollow themself
+// 500: User already follows other user
+// 500: User is already not following other user
 // 500: Internal Server Error
 
 exports.setApp = function( app, client ) 
@@ -56,11 +56,11 @@ exports.setApp = function( app, client )
           response.lastName = user.lastName;
           res.status(200).json(response);
         }
-        // Error 401: Invalid Credentials
+        // Error 400: Invalid Credentials
         else
         {
           response.error = 'Invalid credentials';
-          res.status(401).json(response);
+          res.status(400).json(response);
         }
       }
       catch (error)
@@ -155,7 +155,7 @@ exports.setApp = function( app, client )
             if (userInfo.badgesObtained.some(badge => badge.badgeId.equals(badgeToAdd.badgeId)))
             {
               response.error = 'User ' + userId + ' already has Badge ' + badgeId;
-              res.status(405).json(response);
+              res.status(500).json(response);
               return;
             }
 
@@ -179,7 +179,7 @@ exports.setApp = function( app, client )
           else
           {
             response.error = 'Badge ' + badgeId + ' collection limit exceeded';
-            res.status(403).json(response);
+            res.status(500).json(response);
           }
         }
         catch (error)
@@ -314,7 +314,7 @@ exports.setApp = function( app, client )
       if (currentUserId === otherUserId)
       {
         response.error = 'Current User cannot try to follow themself';
-        res.status(406).json(response);
+        res.status(500).json(response);
         return;
       }
 
@@ -342,7 +342,7 @@ exports.setApp = function( app, client )
         if (currentUser.usersFollowed.some(userId => userId.equals(otherUserId)))
         {
           response.error = 'User ' + currentUserId + 'Already Follows User ' + otherUserId;
-          res.status(407).json(response);
+          res.status(500).json(response);
         }
         else
         {
@@ -380,7 +380,7 @@ exports.setApp = function( app, client )
       if (currentUserId === otherUserId)
       {
         response.error = 'Current User cannot Unfollow themself';
-        res.status(406).json(response);
+        res.status(500).json(response);
         return;
       }
 
@@ -417,7 +417,7 @@ exports.setApp = function( app, client )
         else
         {
           response.error = 'Current User is not Following Other User';
-          res.status(408).json(response);
+          res.status(500).json(response);
         }
       }
       catch (error)
