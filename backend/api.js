@@ -22,7 +22,7 @@ exports.setApp = function( app, client )
 
     // Check if a given id is a valid ObjectId
     // Sends Error 400: ID is not a valid ObjectId with whatever response given
-    function isValidId(id, response)
+    function isValidId(id, response, res)
     {
       if (!ObjectId.isValid(id))
       {
@@ -41,7 +41,7 @@ exports.setApp = function( app, client )
     
       const { email, password } = req.body;
 
-      let response = { userId:null, email:'', firstName:'', lastName:'', error:'' };
+      let response = { userId:'', email:'', firstName:'', lastName:'', error:'' };
 
       try
       {
@@ -77,7 +77,7 @@ exports.setApp = function( app, client )
 
         const { firstName, lastName, email, password } = req.body;
 
-        let response = { userId:null, email:'', firstName:'', lastName:'', error:'' };
+        let response = { userId:'', email:'', firstName:'', lastName:'', error:'' };
 
         const newUser = { password:password, email:email, badgesObtained:[], 
                           firstName:firstName, lastName:lastName, profilePicture:null, 
@@ -122,15 +122,15 @@ exports.setApp = function( app, client )
       const { userId, badgeId } = req.body;
 
       // Verify IDs are valid ObjectIds
-      if (!isValidId(userId, response) || !isValidId(badgeId, response))
+      if (!isValidId(userId, response, res) || !isValidId(badgeId, response, res))
       {
         return;
       }
       
       try 
       {
-          const badgeInfo = await badgeCollection.findOne({ _id: new ObjectId(badgeId) });
-          const userInfo = await userCollection.findOne({ _id: new ObjectId(userId) });
+          const badgeInfo = await badgeCollection.findOne({ _id:new ObjectId(badgeId) });
+          const userInfo = await userCollection.findOne({ _id:new ObjectId(userId) });
 
           // Error 404: ID not found in database
           if (badgeInfo == null)
@@ -207,7 +207,7 @@ exports.setApp = function( app, client )
         error:''
       }
 
-      if (!isValidId(userId, response))
+      if (!isValidId(userId, response, res))
       {
         return;
       }
@@ -233,7 +233,7 @@ exports.setApp = function( app, client )
         // Iterate through all of the user's collected badges
         for (const badgeCollected of user.badgesObtained)
         {
-          if (!isValidId(badgeCollected.badgeId, response))
+          if (!isValidId(badgeCollected.badgeId, response, res))
           {
             return;
           }
@@ -305,7 +305,7 @@ exports.setApp = function( app, client )
 
       let response = { error:'' };
 
-      if (!isValidId(currentUserId, response) || !isValidId(otherUserId, response))
+      if (!isValidId(currentUserId, response, res) || !isValidId(otherUserId, response, res))
       {
         return;
       }
@@ -371,7 +371,7 @@ exports.setApp = function( app, client )
 
       let response = { error: '' };
 
-      if (!isValidId(currentUserId, response) || !isValidId(otherUserId, response))
+      if (!isValidId(currentUserId, response, res) || !isValidId(otherUserId, response, res))
       {
         return;
       }
@@ -437,7 +437,7 @@ exports.setApp = function( app, client )
 
       let response = { hints:[], error:''};
 
-      if (!isValidId(userId, response))
+      if (!isValidId(userId, response, res))
       {
         return;
       }
@@ -484,14 +484,14 @@ exports.setApp = function( app, client )
 
       let response = { activity:[], error:'' };
 
-      if (!isValidId(userId, response))
+      if (!isValidId(userId, response, res))
       {
         return;
       }
 
       try
       {
-        const currUser = await userCollection.findOne({ _id: new ObjectId(userId) });
+        const currUser = await userCollection.findOne({ _id:new ObjectId(userId) });
 
         if (currUser == null)
         {
@@ -503,7 +503,7 @@ exports.setApp = function( app, client )
         // Iterate through all followed users
         for (const followedUserId of currUser.usersFollowed) 
         {
-          if (!isValidId(followedUserId, response))
+          if (!isValidId(followedUserId, response, res))
           {
             return;
           }
