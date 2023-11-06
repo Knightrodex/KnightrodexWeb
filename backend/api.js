@@ -1,6 +1,8 @@
 const { ObjectId } = require('mongodb');
 require('express');
 require('mongodb');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SG_API_KEY);
 
 // Status Codes:
 // 200: Ok
@@ -32,6 +34,29 @@ exports.setApp = function( app, client )
       }
 
       return true;
+    }
+
+    function verifyEmail(email, response, res)
+    {
+      const msg = {
+        to: email, // Change to your recipient
+        from: 'knightrodex@outlook.com', // Change to your verified sender
+        subject: 'Knightrodex Verify Email',
+        text: 'Click this link to verify your email! ',
+        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+      }
+      sgMail
+        .send(msg)
+        .then(() => 
+        {
+          console.log('Verification Email Sent!')
+          res.status(200).json(response);
+        })
+        .catch((error) => 
+        {
+          console.error(error)
+          res.status(400).json(response);
+        })
     }
 
     app.post('/api/login', async (req, res) => 
@@ -101,14 +126,16 @@ exports.setApp = function( app, client )
             response.email = result.email;
             response.firstName = firstName;
             response.lastName = lastName;
-
-            res.status(200).json(response);
           }
         }
         catch (e)
         {
           response.error = e.toString();
           res.status(500).json(response);
+        }
+        if (res.status() == 200)
+        {
+          verifyEmail(email, response, res);
         }
     });
 
