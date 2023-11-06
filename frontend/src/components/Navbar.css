@@ -1,0 +1,138 @@
+/* Styles for Navbar component */
+.side-navbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px;
+
+}
+
+.navbar-title {
+  color: #0c353a;
+  font-size: 36px;
+  /* Adjust the font size as needed */
+  font-weight: bold;
+  margin: 0;
+  /* Remove any default margin */
+  padding: 16px;
+  /* Add padding to separate it from the navigation menu */
+}
+
+.nav-menu {
+  /* background-color: #060b26; */
+  border-right: 2px solid gray;
+  width: 250px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition: 850ms;
+}
+
+.nav-menu-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-menu-items li {
+  padding: 5px 50px; /* Increase the horizontal padding (left and right) to 20px and keep the vertical padding at 15px */
+  margin: 15px;
+  border: 2px solid gray;
+  border-radius: 10px;
+  /* Add rounded corners to the border */
+  transition: background-color 0.3s;
+}
+
+.nav-menu-items li:hover {
+  background-color: #c0c0c0;
+ }
+
+.nav-menu-items li a {
+  display: block;
+  padding: 10px;
+  text-decoration: none;
+  color: #272525;
+  font-size: 18px;
+}
+
+ 
+
+
+/* .nav-text {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  padding: 0px 0px 8px 16px;
+  list-style: none;
+  height: 60px;
+}
+
+.nav-text a {
+  text-decoration: none;
+  color: #f5f5f5;
+  font-size: 18px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border-radius: 4px;
+}
+
+.nav-text a:hover {
+  background-color: #1a83ff;
+} */
+
+/* .navbar {
+    background-color: #060b26;
+    height: 80px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+  }
+  
+  .menu-bars {
+    margin-left: 2rem;
+    font-size: 2rem;
+    background: none;
+  }
+  
+  .nav-menu {
+    background-color: #060b26;
+    width: 250px;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    transition: 850ms;
+  }
+  
+  .nav-menu.active {
+    left: 0;
+    transition: 350ms;
+  }
+
+  
+  .nav-menu-items {
+    width: 100%;
+  }
+  
+  .navbar-toggle {
+    background-color: #060b26;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+  }
+  
+  span {
+    margin-left: 16px;
+  } */

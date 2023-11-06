@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import React, { useState } from "react";
+import Navbar from "../components/Navbar";
+ import UserProfile from "../components/UserProfile";
+import { Link } from 'react-router-dom';
+
+import 'bootstrap/dist/css/bootstrap.css';
 
 function HomePage() {
 
     return (
-        <section className="vh-20">
-            <div className="container-fluid h-100">
-                <h1>WELCOME TO HOMEPAGE</h1>
-
-            </div>
-        </section>
+        <>
+            <Navbar />
+            <UserProfile />
+        </>
     );
+
 }
 
 
