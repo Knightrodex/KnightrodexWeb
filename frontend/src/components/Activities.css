@@ -1,0 +1,76 @@
+
+ /* body{
+    margin-top:20px;
+    background:#eee;
+} */
+
+.activities {
+    max-height: 1200px;
+    max-width: 740px; /* Adjust the value to your desired maximum width */
+    position: relative;
+    padding-bottom: 50px;
+  
+    /* Centering styles */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: left;
+    margin: 50px auto 0 auto; /* Adds 50px space to the top */
+}
+.decor-default {
+    background-color: #ffffff !important;
+    border: 1px solid gray;
+    border-radius: 10px;
+}
+ div[class*='col-'] > .col-inside-lg {
+    padding: 20px;
+}
+
+.activities .unit {
+    border-bottom: 1px solid #d8d8d8;
+    padding: 20px 0 20px 50px;
+    min-height: 80px;
+    position: relative;
+    overflow: hidden;
+}
+.activities .unit .avatar {
+    display: block;
+    width: 40px;
+    height: 90px;
+    position: absolute;
+    top: 20px;
+    left: 0;
+}
+.activities .unit .avatar img {
+    display: block;
+    border-radius: 50%;
+    max-width: 100%;
+}
+
+.activities .unit .field {
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.activities .unit .field a {
+    font-weight: bold;
+    color: #333333;
+}
+
+.activities .unit .field.btn-group-xs {
+    padding: 20px 0 0;
+}
+.activities .unit .field {
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 20px;
+}
+.f-l {
+    float: left;
+}
+
+.unit .avatar img{
+    width:50px  !important;
+    height:50px !important;
+}

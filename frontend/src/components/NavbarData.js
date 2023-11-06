@@ -4,7 +4,7 @@ import React from 'react';
 export const NavbarData = [
     {
         title: 'Home',
-        path: '/',
+        path: '/HomePage',
         cName: 'nav-text'
     },
     {
@@ -13,23 +13,18 @@ export const NavbarData = [
         cName: 'nav-text'
     },
     {
-        title: 'Products',
+        title: 'Leaderboards',
         path: '/products',
         cName: 'nav-text'
     },
     {
-        title: 'Team',
+        title: 'Messages',
         path: '/team',
         cName: 'nav-text'
     },
     {
-        title: 'Messages',
-        path: '/messages',
+        title: 'Sign out',
+        path: '/',
         cName: 'nav-text'
     },
-    {
-        title: 'Support',
-        path: '/support',
-        cName: 'nav-text'
-    }
 ];

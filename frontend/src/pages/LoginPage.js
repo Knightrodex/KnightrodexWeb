@@ -21,7 +21,6 @@ function Login() {
     const [loginPassword, setLoginPassword] = useState('');
     const [error, setError] = useState('');
 
-
     const doLogin = async (e) => {
         e.preventDefault();
         // Create an object with the login data

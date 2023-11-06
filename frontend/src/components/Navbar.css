@@ -20,9 +20,9 @@
 }
 
 .nav-menu {
-  /* background-color: #060b26; */
-  border-right: 2px solid gray;
-  width: 250px;
+  background-color: #ffffff;
+  border-right: 1px solid gray;
+  width: 270px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -40,7 +40,8 @@
 }
 
 .nav-menu-items li {
-  padding: 5px 50px; /* Increase the horizontal padding (left and right) to 20px and keep the vertical padding at 15px */
+  padding: 1px 50px;
+  /* Increase the horizontal padding (left and right) to 20px and keep the vertical padding at 15px */
   margin: 15px;
   border: 2px solid gray;
   border-radius: 10px;
@@ -50,7 +51,7 @@
 
 .nav-menu-items li:hover {
   background-color: #c0c0c0;
- }
+}
 
 .nav-menu-items li a {
   display: block;
@@ -60,7 +61,7 @@
   font-size: 18px;
 }
 
- 
+
 
 
 /* .nav-text {

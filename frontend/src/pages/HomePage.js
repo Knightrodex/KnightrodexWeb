@@ -1,20 +1,36 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
- import UserProfile from "../components/UserProfile";
-import { Link } from 'react-router-dom';
+import UserList from '../components/UserList';
+import SearchBar from '../components/SearchBar';
 
-import 'bootstrap/dist/css/bootstrap.css';
+const initialUsers = [ // This is your initial list of users
+    { id: 1, name: 'Nathan Cheng' },
+    { id: 2, name: 'Natalie Constnat' },
+    { id: 3, name: 'ethan metryoos' },
+    // Add more user data
+];
 
 function HomePage() {
+    const [filteredUsers, setFilteredUsers] = useState(initialUsers);
+
+    const handleSearch = (searchTerm) => {
+        if (searchTerm) {
+            const filtered = initialUsers.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            setFilteredUsers(filtered);
+        } else {
+            setFilteredUsers(initialUsers);
+        }
+    };
 
     return (
         <>
-            <Navbar />
-            <UserProfile />
+            {/* <Navbar /> */}
+            <div>
+                <SearchBar users={filteredUsers} onSearch={handleSearch} />
+                <UserList users={filteredUsers} />
+            </div>
         </>
     );
-
 }
 
-
-export default HomePage; 
+export default HomePage;
