@@ -12,14 +12,20 @@ const SearchBar = ({ users, onSearch }) => {
     };
 
     return (
-        <div className='search-container'>
+        <div>
             <input
-                type="text"
-                placeholder="Search users"
+                type='text'
+                placeholder='Search users'
                 value={searchTerm}
                 onChange={handleSearch}
-                className="search-input"
+                className='search-input'
             />
+            <ul className="user-list">
+                {users.map((user) => (
+                    <li key={user.id}>{user.name}</li>
+                ))}
+            </ul>
+
         </div>
     );
 };

@@ -27,8 +27,7 @@ function HomePage() {
             {/* <Navbar /> */}
             <div>
                 <SearchBar users={filteredUsers} onSearch={handleSearch} />
-                <UserList users={filteredUsers} />
-            </div>
+             </div>
         </>
     );
 }
