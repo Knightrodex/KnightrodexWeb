@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+const EXPIRATION_TIME = '24h';
+
 exports.createToken = function(id, fn, ln, em)
 {
     return _createToken(id, fn, ln, em);
@@ -14,9 +16,9 @@ _createToken = function(id, fn, ln, em)
         const expiration = new Date();
         const user = {userId:id, firstName:fn, lastName:ln, email:em};
 
-        const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,
+        const accessToken = jwt.sign(user, process.env.JWT_KEY,
             {
-                expiresIn:'24h'
+                expiresIn:EXPIRATION_TIME
             });
 
         response.accessToken = accessToken;
@@ -31,9 +33,10 @@ _createToken = function(id, fn, ln, em)
 
 exports.isExpired = function(token)
 {
-    let isError = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, error, verifiedJwt =>
+    let isError = jwt.verify( token, process.env.ACCESS_TOKEN_SECRET,
+        (err, verifiedJwt) =>
     {
-        if (error)
+        if (err)
         {
             return true;
         }

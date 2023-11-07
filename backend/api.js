@@ -1,6 +1,7 @@
 const { ObjectId } = require('mongodb');
 require('express');
 require('mongodb');
+const token = require('../createJWT');
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SG_API_KEY);
 
@@ -28,7 +29,7 @@ exports.setApp = function( app, client )
     {
       if (!ObjectId.isValid(id))
       {
-        response.error = id + " is not a valid ObjectId";
+        response.error = "ID is not a valid ObjectId";
         res.status(400).json(response);
         return false;
       }
@@ -36,6 +37,7 @@ exports.setApp = function( app, client )
       return true;
     }
 
+    // Use email verification with SendGrid API
     function verifyEmail(email, response, res)
     {
       const msg = {
@@ -54,9 +56,22 @@ exports.setApp = function( app, client )
         })
         .catch((error) => 
         {
-          console.error(error)
+          response.error = error.toString();
           res.status(400).json(response);
         })
+    }
+
+    // check if a given JWT is expired
+    function isTokenExpired(jwtToken, response, res)
+    {
+      if (token.isExpired(jwtToken))
+      {
+        response.error = 'JWT is no longer valid';
+        res.status(500).json(response);
+        return true;
+      }
+
+      return false;
     }
 
     app.post('/api/login', async (req, res) => 
@@ -66,7 +81,7 @@ exports.setApp = function( app, client )
     
       const { email, password } = req.body;
 
-      let response = { userId:'', email:'', firstName:'', lastName:'', error:'' };
+      let response = { accessToken:'', error:'' }
 
       try
       {
@@ -75,10 +90,7 @@ exports.setApp = function( app, client )
         // User with given credentials exists
         if(user != null)
         {
-          response.userId = user._id;
-          response.email = user.email;
-          response.firstName = user.firstName;
-          response.lastName = user.lastName;
+          response = token.createToken(user._id, user.firstName, user.lastName, user.email);
           res.status(200).json(response);
         }
         // Error 400: Invalid Credentials
@@ -102,7 +114,7 @@ exports.setApp = function( app, client )
 
         const { firstName, lastName, email, password } = req.body;
 
-        let response = { userId:'', email:'', firstName:'', lastName:'', error:'' };
+        let response = { accessToken:'', error:'' };
 
         const newUser = { password:password, email:email, badgesObtained:[], 
                           firstName:firstName, lastName:lastName, profilePicture:null, 
@@ -122,20 +134,15 @@ exports.setApp = function( app, client )
           else
           {
             const result = await userCollection.insertOne(newUser);
-            response.userId = result.insertedId;
-            response.email = result.email;
-            response.firstName = firstName;
-            response.lastName = lastName;
+            response = token.createToken(result._id, result.firstName, result.lastName, result.email);
+            verifyEmail(email, response, res);
+            res.status(200).json(response);
           }
         }
         catch (e)
         {
           response.error = e.toString();
           res.status(500).json(response);
-        }
-        if (res.status() == 200)
-        {
-          verifyEmail(email, response, res);
         }
     });
 
@@ -144,9 +151,16 @@ exports.setApp = function( app, client )
       // incoming: userId, badgeId
       // outgoing: badgeId, dateObtained, uniqueNumber
 
-      let response = {badgeInfo:{}, dateObtained:null, uniqueNumber:null, error:''};
+      let response = {badgeInfo:{}, dateObtained:null, uniqueNumber:null, jwtToken:'', error:''};
 
-      const { userId, badgeId } = req.body;
+      const { userId, badgeId, jwtToken } = req.body;
+
+      if (isTokenExpired(jwtToken, response, res))
+      {
+        return;
+      }
+
+      console.log("Not expired");
 
       // Verify IDs are valid ObjectIds
       if (!isValidId(userId, response, res) || !isValidId(badgeId, response, res))
@@ -156,19 +170,22 @@ exports.setApp = function( app, client )
       
       try 
       {
+          response.jwtToken = token.refresh(jwtToken);
+          console.log("Refreshed");
+
           const badgeInfo = await badgeCollection.findOne({ _id:new ObjectId(badgeId) });
           const userInfo = await userCollection.findOne({ _id:new ObjectId(userId) });
 
           // Error 404: ID not found in database
           if (badgeInfo == null)
           {
-            response.error = 'Badge ' + badgeId + ' not Found';
+            response.error = 'Badge not Found';
             res.status(404).json(response);
             return;
           }
           else if (userInfo == null)
           {
-            response.error = 'User ' + userId + ' not Found';
+            response.error = 'User not Found';
             res.status(404).json(response);
             return;
           }
@@ -181,7 +198,7 @@ exports.setApp = function( app, client )
             // Ensure User does not add a badge they already have
             if (userInfo.badgesObtained.some(badge => badge.badgeId.equals(badgeToAdd.badgeId)))
             {
-              response.error = 'User ' + userId + ' already has Badge ' + badgeId;
+              response.error = 'User already has Badge';
               res.status(500).json(response);
               return;
             }
@@ -205,7 +222,7 @@ exports.setApp = function( app, client )
           }
           else
           {
-            response.error = 'Badge ' + badgeId + ' collection limit exceeded';
+            response.error = 'Badge collected to limit';
             res.status(500).json(response);
           }
         }
@@ -221,7 +238,7 @@ exports.setApp = function( app, client )
       // incoming: userId
       // outgoing: userId, first/last name, pfp, usersFollowing, info about badges collected
 
-      const userId  = req.body.userId;
+      const {userId, jwtToken }  = req.body;
       
       let response = {
         userId:null,
@@ -231,7 +248,13 @@ exports.setApp = function( app, client )
         usersFollowed:[],
         dateCreated:null,
         badgesCollected:[],
+        jwtToken:'',
         error:''
+      }
+
+      if (isTokenExpired(jwtToken, response, res))
+      {
+        return;
       }
 
       if (!isValidId(userId, response, res))
@@ -241,6 +264,8 @@ exports.setApp = function( app, client )
 
       try
       {
+        response.jwtToken = token.refresh(jwtToken);
+
         const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
         if (user == null) 
@@ -306,12 +331,18 @@ exports.setApp = function( app, client )
       // incoming: email (partial)
       // outgoing: all user info whose email matches partial email
 
-      const partialEmail = req.body.email;
+      const { partialEmail, jwtToken } = req.body.email;
 
-      let response = { result:[], error:'' };
+      let response = { result:[], jwtToken:'', error:'' };
+
+      if (isTokenExpired(jwtToken, response, res))
+      {
+        return;
+      }
 
       try 
       {
+        response.jwtToken = token.refresh(jwtToken);
         const result = await userCollection.find({ email:{$regex:`${partialEmail}`, $options:'i'} }).toArray();
         response.result = result;
         res.status(200).json(response);
@@ -328,9 +359,14 @@ exports.setApp = function( app, client )
       // incoming: currentUserId, otherUserId
       // outgoing: success boolean
 
-      const { currentUserId, otherUserId } = req.body;
+      const { currentUserId, otherUserId, jwtToken } = req.body;
 
-      let response = { error:'' };
+      let response = { jwtToken:'', error:'' };
+
+      if (isTokenExpired(jwtToken, response, res))
+      {
+        return;
+      }
 
       if (!isValidId(currentUserId, response, res) || !isValidId(otherUserId, response, res))
       {
@@ -347,6 +383,8 @@ exports.setApp = function( app, client )
 
       try
       {
+        response.jwtToken = token.refresh(jwtToken);
+
         // Find both users in the collection
         const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
         const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
@@ -394,9 +432,14 @@ exports.setApp = function( app, client )
       // incoming: currentUserId, otherUserId
       // outgoing: success boolean
 
-      const { currentUserId, otherUserId } = req.body;
+      const { currentUserId, otherUserId, jwtToken } = req.body;
 
-      let response = { error: '' };
+      let response = { jwtToken:'', error: '' };
+
+      if (isTokenExpired(jwtToken))
+      {
+        return;
+      }
 
       if (!isValidId(currentUserId, response, res) || !isValidId(otherUserId, response, res))
       {
@@ -411,26 +454,28 @@ exports.setApp = function( app, client )
         return;
       }
 
-      // Find both users in the collection
-      const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
-      const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
-
-      // Verify both users exist in database
-      if (currentUser == null)
-      {
-        response.error = 'User ' + currentUserId + ' Not Found';
-        res.status(404).json(response);
-        return;
-      }
-      else if (otherUser == null)
-      {
-        response.error = 'User ' + otherUserId + ' Not Found';
-        res.status(404).json(response);
-        return;
-      }
-
       try
       {
+        response.jwtToken = token.refresh(jwtToken);
+
+        // Find both users in the collection
+        const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
+        const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
+
+        // Verify both users exist in database
+        if (currentUser == null)
+        {
+          response.error = 'User ' + currentUserId + ' Not Found';
+          res.status(404).json(response);
+          return;
+        }
+        else if (otherUser == null)
+        {
+          response.error = 'User ' + otherUserId + ' Not Found';
+          res.status(404).json(response);
+          return;
+        }
+
         // If current user is not following other user, add other user to current user's usersFollowed list
         if (currentUser.usersFollowed.some(userId => userId.equals(otherUserId)))
         {
@@ -460,9 +505,14 @@ exports.setApp = function( app, client )
       // incoming: userId
       // outgoing: array of hints for badges user does not have
 
-      const userId = req.body.userId;
+      const { userId, jwtToken } = req.body;
 
-      let response = { hints:[], error:''};
+      let response = { hints:[], jwtToken:'', error:''};
+
+      if (isTokenExpired(jwtToken))
+      {
+        return;
+      }
 
       if (!isValidId(userId, response, res))
       {
@@ -471,6 +521,8 @@ exports.setApp = function( app, client )
 
       try
       {
+        response.jwtToken = token.refresh(jwtToken);
+
         const user = await userCollection.findOne({_id: new ObjectId(userId)});
         const allBadges = await badgeCollection.find().toArray(); // Return all badges in collection as array
 
@@ -507,9 +559,14 @@ exports.setApp = function( app, client )
       // incoming: userId
       // outgoing: list of objects (name, badge, time) sorted in reverse chronological order
 
-      const userId = req.body.userId;
+      const { userId, jwtToken } = req.body;
 
-      let response = { activity:[], error:'' };
+      let response = { activity:[], jwtToken:'', error:'' };
+
+      if (isTokenExpired(jwtToken))
+      {
+        return;
+      }
 
       if (!isValidId(userId, response, res))
       {
@@ -518,6 +575,8 @@ exports.setApp = function( app, client )
 
       try
       {
+        response.jwtToken = token.refresh(jwtToken);
+
         const currUser = await userCollection.findOne({ _id:new ObjectId(userId) });
 
         if (currUser == null)
