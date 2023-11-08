@@ -1,8 +1,7 @@
 import React from 'react'
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import './UserProfile.css';
-import { Link } from 'react-router-dom';
+ import { Link } from 'react-router-dom';
 
 function UserProfile({ userData }) {
     const {
