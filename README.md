@@ -1,5 +1,6 @@
-# Knightrodex
-Hello, world! We present to you a QR-based badge-hunting app for UCF students by UCF students. Check out our [website](https://knightrodex-49dcc2a6c1ae.herokuapp.com/).
+# Knightrodex - Web Version
+Hello, world! We present to you a QR-based badge-hunting app for UCF students by UCF students. Check out our [website](https://knightrodex-49dcc2a6c1ae.herokuapp.com/).\
+The repo for the iOS app can be found [here](https://github.com/Knightrodex/knightrodex-ios).
 
 ## Front-end
 - [Caden Brown](https://github.com/kudoCodes)
