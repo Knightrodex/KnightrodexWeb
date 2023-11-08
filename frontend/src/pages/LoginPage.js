@@ -1,7 +1,9 @@
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
+import { UserContext } from '../UserContext';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
 
@@ -20,6 +22,8 @@ function Login() {
     const [loginUsername, setLoginUsername] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [error, setError] = useState('');
+    const { user, setUser } = useContext(UserContext);
+    const navigate = useNavigate();
 
     const doLogin = async (e) => {
         e.preventDefault();
@@ -48,8 +52,10 @@ function Login() {
                 } else {
                     // Login successful, you can redirect or perform other actions
                     setError('');
+                    setUser(data);
+
                     alert('Login successful!'); // Display a success message or redirect here
-                    window.location.href = '/HomePage';
+                    await navigate('/HomePage');
                 }
             } else {
 
