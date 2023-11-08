@@ -41,12 +41,11 @@
 
 .nav-menu-items li {
   padding: 1px 50px;
-  /* Increase the horizontal padding (left and right) to 20px and keep the vertical padding at 15px */
   margin: 15px;
   border: 2px solid gray;
   border-radius: 10px;
-  /* Add rounded corners to the border */
   transition: background-color 0.3s;
+
 }
 
 .nav-menu-items li:hover {
@@ -64,7 +63,9 @@
 
 
 
-/* .nav-text {
+/* 
+
+.nav-text {
   display: flex;
   justify-content: start;
   align-items: center;
