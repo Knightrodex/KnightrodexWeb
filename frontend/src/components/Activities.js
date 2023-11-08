@@ -80,7 +80,7 @@ function Activities() {
     ];
 
     return (
-        <div className="container bootstrap snippets bootdeys custom-body">
+         <div className="container bootstrap snippets bootdeys custom-body">
             <div className="col-md-12 col-right">
                 <div
                     className="col-inside-lg decor-default activities"
