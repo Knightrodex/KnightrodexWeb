@@ -76,8 +76,8 @@ exports.setApp = function( app, client )
 
     app.post('/api/login', async (req, res) => 
     {
-      // incoming: login, password (hashed)
-      // outgoing: id, firstName, lastName, error
+      // incoming: email, password
+      // outgoing: JWT containing id, first/last name, and email, error
     
       const { email, password } = req.body;
 
@@ -114,7 +114,7 @@ exports.setApp = function( app, client )
 
         const { firstName, lastName, email, password } = req.body;
 
-        let response = { accessToken:'', error:'' };
+        let response = { userId:'', firstName:'', lastName:'', email:'', error:'' };
 
         const newUser = { password:password, email:email, badgesObtained:[], 
                           firstName:firstName, lastName:lastName, profilePicture:null, 
@@ -133,9 +133,12 @@ exports.setApp = function( app, client )
           // Insert new user into the database
           else
           {
-            const result = await userCollection.insertOne(newUser);
-            response = token.createToken(result._id, result.firstName, result.lastName, result.email);
             verifyEmail(email, response, res);
+            const result = await userCollection.insertOne(newUser);
+            response.userId = result.insertedId;
+            response.firstName = firstName;
+            response.lastName = lastName;
+            response.email = email;
             res.status(200).json(response);
           }
         }
@@ -151,7 +154,7 @@ exports.setApp = function( app, client )
       // incoming: userId, badgeId
       // outgoing: badgeId, dateObtained, uniqueNumber
 
-      let response = {badgeInfo:{}, dateObtained:null, uniqueNumber:null, jwtToken:'', error:''};
+      let response = {badgeInfo:{}, dateObtained:'', uniqueNumber:'', jwtToken:'', error:''};
 
       const { userId, badgeId, jwtToken } = req.body;
 
@@ -241,12 +244,12 @@ exports.setApp = function( app, client )
       const {userId, jwtToken }  = req.body;
       
       let response = {
-        userId:null,
+        userId:-1,
         firstName:'',
         lastName:'',
         profilePicture:'',
         usersFollowed:[],
-        dateCreated:null,
+        dateCreated:'',
         badgesCollected:[],
         jwtToken:'',
         error:''
@@ -331,7 +334,7 @@ exports.setApp = function( app, client )
       // incoming: email (partial)
       // outgoing: all user info whose email matches partial email
 
-      const { partialEmail, jwtToken } = req.body.email;
+      const { partialEmail, jwtToken } = req.body;
 
       let response = { result:[], jwtToken:'', error:'' };
 
@@ -386,8 +389,8 @@ exports.setApp = function( app, client )
         response.jwtToken = token.refresh(jwtToken);
 
         // Find both users in the collection
-        const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
-        const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
+        const currentUser = await userCollection.findOne({ _id:new ObjectId(currentUserId) });
+        const otherUser = await userCollection.findOne({ _id:new ObjectId(otherUserId) });
 
         // Verify both users exist in database
         if (currentUser == null)
@@ -459,8 +462,8 @@ exports.setApp = function( app, client )
         response.jwtToken = token.refresh(jwtToken);
 
         // Find both users in the collection
-        const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
-        const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
+        const currentUser = await userCollection.findOne({ _id:new ObjectId(currentUserId) });
+        const otherUser = await userCollection.findOne({ _id:new ObjectId(otherUserId) });
 
         // Verify both users exist in database
         if (currentUser == null)
@@ -627,6 +630,5 @@ exports.setApp = function( app, client )
         response.error = error.toString();
         res.status(500).json(response);
       }
-
     });
 }
