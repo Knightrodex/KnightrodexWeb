@@ -4,6 +4,7 @@ import React, { useState, useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import { UserContext } from '../UserContext';
 import { useNavigate } from 'react-router-dom';
+const md5 = require("blueimp-md5");
 
 function Login() {
 
@@ -27,10 +28,14 @@ function Login() {
 
     const doLogin = async (e) => {
         e.preventDefault();
+
+        // hash password
+        var hash = md5(loginPassword);
+
         // Create an object with the login data
         const loginData = {
             email: loginUsername,
-            password: loginPassword,
+            password: hash
         };
 
         try {

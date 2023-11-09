@@ -1,10 +1,10 @@
 import { useState } from 'react';
+const md5 = require("blueimp-md5");
 
 const SignUp = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
-    const [username, setUsername] = useState('');
     const [password1, setPassword1] = useState('');
     const [password2, setPassword2] = useState('');
     const [isPending, setIsPending] = useState(false);
@@ -40,16 +40,19 @@ const SignUp = () => {
         }
 
         if (!isPending) {
-            console.log("hello");
-            // then we do API to add an account
-            // redirect when done!
+            console.log(password1);
+            
+            // hash password
+            var hash = md5(password1);
+
+            console.log(hash);
 
             // Create an object with the registration data
             const registrationData = {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
-                password: password1
+                password: hash
             };
 //buildPath('/api/signup')
             try {
@@ -131,15 +134,6 @@ const SignUp = () => {
                         onChange={(e) => setEmail(e.target.value)}
                     />
                     {!isEmailValid && <p>Must enter a valid email address</p>}
-                </div>
-                <div>
-                    <label>Username: </label>
-                    <input
-                        type="text"
-                        required
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
                 </div>
                 <div>
                     <label>Password: </label>
