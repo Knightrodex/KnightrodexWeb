@@ -39,13 +39,9 @@ const SignUp = () => {
             setIsPending(false);
         }
 
-        if (!isPending) {
-            console.log(password1);
-            
+        if (!isPending) {           
             // hash password
             var hash = md5(password1);
-
-            console.log(hash);
 
             // Create an object with the registration data
             const registrationData = {
