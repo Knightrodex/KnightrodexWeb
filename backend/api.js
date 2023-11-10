@@ -117,7 +117,7 @@ exports.setApp = function( app, client )
         let response = { accessToken:'', error:'' };
 
         const newUser = { password:password, email:email, badgesObtained:[], 
-                          firstName:firstName, lastName:lastName, profilePicture:null, 
+                          firstName:firstName, lastName:lastName, profilePicture:'', 
                           usersFollowed:[], dateCreated:(new Date()) };
 
         try
@@ -238,12 +238,12 @@ exports.setApp = function( app, client )
       const {userId, jwtToken }  = req.body;
       
       let response = {
-        userId:null,
+        userId:'',
         firstName:'',
         lastName:'',
         profilePicture:'',
         usersFollowed:[],
-        dateCreated:null,
+        dateCreated:'',
         badgesCollected:[],
         jwtToken:'',
         error:''
