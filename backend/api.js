@@ -151,7 +151,7 @@ exports.setApp = function( app, client )
       // incoming: userId, badgeId
       // outgoing: badgeId, dateObtained, uniqueNumber
 
-      let response = {badgeInfo:{}, dateObtained:null, uniqueNumber:null, jwtToken:'', error:''};
+      let response = {badgeInfo:{}, dateObtained:'', uniqueNumber:-1, jwtToken:'', error:''};
 
       const { userId, badgeId, jwtToken } = req.body;
 
@@ -159,8 +159,6 @@ exports.setApp = function( app, client )
       {
         return;
       }
-
-      console.log("Not expired");
 
       // Verify IDs are valid ObjectIds
       if (!isValidId(userId, response, res) || !isValidId(badgeId, response, res))
@@ -171,7 +169,6 @@ exports.setApp = function( app, client )
       try 
       {
           response.jwtToken = token.refresh(jwtToken);
-          console.log("Refreshed");
 
           const badgeInfo = await badgeCollection.findOne({ _id:new ObjectId(badgeId) });
           const userInfo = await userCollection.findOne({ _id:new ObjectId(userId) });
