@@ -76,12 +76,12 @@ exports.setApp = function( app, client )
 
     app.post('/api/login', async (req, res) => 
     {
-      // incoming: email, password
-      // outgoing: JWT containing id, first/last name, and email, error
+      // incoming: login, password (hashed)
+      // outgoing: id, firstName, lastName, error
     
       const { email, password } = req.body;
 
-      let response = { accessToken:'', error:'' }
+      let response = { jwtToken:'', error:'' }
 
       try
       {
@@ -114,7 +114,7 @@ exports.setApp = function( app, client )
 
         const { firstName, lastName, email, password } = req.body;
 
-        let response = { userId:'', firstName:'', lastName:'', email:'', error:'' };
+        let response = { accessToken:'', error:'' };
 
         const newUser = { password:password, email:email, badgesObtained:[], 
                           firstName:firstName, lastName:lastName, profilePicture:null, 
@@ -133,12 +133,9 @@ exports.setApp = function( app, client )
           // Insert new user into the database
           else
           {
-            verifyEmail(email, response, res);
             const result = await userCollection.insertOne(newUser);
-            response.userId = result.insertedId;
-            response.firstName = firstName;
-            response.lastName = lastName;
-            response.email = email;
+            response = token.createToken(result._id, result.firstName, result.lastName, result.email);
+            verifyEmail(email, response, res);
             res.status(200).json(response);
           }
         }
@@ -154,7 +151,7 @@ exports.setApp = function( app, client )
       // incoming: userId, badgeId
       // outgoing: badgeId, dateObtained, uniqueNumber
 
-      let response = {badgeInfo:{}, dateObtained:'', uniqueNumber:'', jwtToken:'', error:''};
+      let response = {badgeInfo:{}, dateObtained:null, uniqueNumber:null, jwtToken:'', error:''};
 
       const { userId, badgeId, jwtToken } = req.body;
 
@@ -244,12 +241,12 @@ exports.setApp = function( app, client )
       const {userId, jwtToken }  = req.body;
       
       let response = {
-        userId:-1,
+        userId:null,
         firstName:'',
         lastName:'',
         profilePicture:'',
         usersFollowed:[],
-        dateCreated:'',
+        dateCreated:null,
         badgesCollected:[],
         jwtToken:'',
         error:''
@@ -334,7 +331,7 @@ exports.setApp = function( app, client )
       // incoming: email (partial)
       // outgoing: all user info whose email matches partial email
 
-      const { partialEmail, jwtToken } = req.body;
+      const { partialEmail, jwtToken } = req.body.email;
 
       let response = { result:[], jwtToken:'', error:'' };
 
@@ -389,8 +386,8 @@ exports.setApp = function( app, client )
         response.jwtToken = token.refresh(jwtToken);
 
         // Find both users in the collection
-        const currentUser = await userCollection.findOne({ _id:new ObjectId(currentUserId) });
-        const otherUser = await userCollection.findOne({ _id:new ObjectId(otherUserId) });
+        const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
+        const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
 
         // Verify both users exist in database
         if (currentUser == null)
@@ -462,8 +459,8 @@ exports.setApp = function( app, client )
         response.jwtToken = token.refresh(jwtToken);
 
         // Find both users in the collection
-        const currentUser = await userCollection.findOne({ _id:new ObjectId(currentUserId) });
-        const otherUser = await userCollection.findOne({ _id:new ObjectId(otherUserId) });
+        const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
+        const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
 
         // Verify both users exist in database
         if (currentUser == null)
@@ -630,5 +627,6 @@ exports.setApp = function( app, client )
         response.error = error.toString();
         res.status(500).json(response);
       }
+
     });
 }
