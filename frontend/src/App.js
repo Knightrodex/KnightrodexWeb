@@ -6,6 +6,7 @@ import SignUpPage from './pages/SignUpPage';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage'; 
 import { UserContext } from './UserContext';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -18,6 +19,7 @@ function App() {
           <Route path="/SignUp" element={<SignUpPage />} />
           <Route path="/HomePage" element={<HomePage />} />
           <Route path="/ProfilePage" element={<ProfilePage />} />
+          <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
         </Routes>
       </BrowserRouter>
     </UserContext.Provider>
