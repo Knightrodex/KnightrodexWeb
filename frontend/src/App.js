@@ -7,9 +7,17 @@ import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage'; 
 import { UserContext } from './UserContext';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import RouteGuard from './components/RouteGuard';
+import { setAuthToken } from './components/setAuthToken';
 
 function App() {
   const [user, setUser] = useState(null);
+
+  // check jwt token
+  const token = localStorage.getItem("token");
+  if (token) {
+      setAuthToken(token);
+  }
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -17,8 +25,12 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/SignUp" element={<SignUpPage />} />
-          <Route path="/HomePage" element={<HomePage />} />
-          <Route path="/ProfilePage" element={<ProfilePage />} />
+          <Route path="/HomePage" element={<RouteGuard />}>
+            <Route path="/HomePage" element={<HomePage />} />
+          </Route>
+          <Route path="/ProfilePage" element={<RouteGuard />}>
+            <Route path="/ProfilePage" element={<ProfilePage />} />
+          </Route>
           <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
         </Routes>
       </BrowserRouter>

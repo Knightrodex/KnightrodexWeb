@@ -1,3 +1,8 @@
+// hello future Ethan or Caden, can you implement something to display that someone
+// tried to login with invalid credentials, an error message or something that
+// displays under the form after you try to login and fail.
+// Thanks    - Caden from the past
+
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import React, { useState, useContext } from 'react';
@@ -5,6 +10,8 @@ import 'bootstrap/dist/css/bootstrap.css';
 import { UserContext } from '../UserContext';
 import { useNavigate } from 'react-router-dom';
 import ForgotPasswordBox from '../components/ForgotPasswordBox';
+import axios from 'axios';
+import { setAuthToken } from '../components/setAuthToken';
 const md5 = require("blueimp-md5");
 
 
@@ -28,55 +35,82 @@ function Login() {
     const { user, setUser } = useContext(UserContext);
     const navigate = useNavigate();
 
-    const doLogin = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // hash password
         var hash = md5(loginPassword);
 
-        // Create an object with the login data
+        // create an object with the login data
         const loginData = {
             email: loginUsername,
             password: hash
         };
 
-        try {
-            const response = await fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(loginData),
-            });
+        axios.post("https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/login", loginData)
+            .then(response => {
+                // get token from response
+                const token = response.data.jwtToken;
 
-            if (response.ok) {
+                // store JWT in local
+                localStorage.setItem("token", token);
 
-                const data = await response.json();
-                if (data.error) {
-                    setError(data.error);
-                    alert("Login Failed!");
+                // set token to axios common header
+                setAuthToken(token);
 
-                } else {
-                    // Login successful, you can redirect or perform other actions
-                    setError('');
-                    setUser(data);
+                navigate('/HomePage');
+            })
+            .catch(err => console.log(err));
+    }
 
-                    alert('Login successful!'); // Display a success message or redirect here
-                    await navigate('/HomePage');
-                }
-            } else {
+    // ------------------------------------------------------ preserving this bad boi
+    // const doLogin = async (e) => {
+    //     e.preventDefault();
 
-                // Handle login failure here
-                setError('Invalid credentials');
-                alert('Login failed. Please check your credentials.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            setError('An error occurred during login. Please try again later.');
-        }
-    };
+    //     // hash password
+    //     var hash = md5(loginPassword);
 
+    //     // Create an object with the login data
+    //     const loginData = {
+    //         email: loginUsername,
+    //         password: hash
+    //     };
 
+    //     try {
+    //         const response = await fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/login', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(loginData),
+    //         });
+
+    //         if (response.ok) {
+
+    //             const data = await response.json();
+    //             if (data.error) {
+    //                 setError(data.error);
+    //                 alert("Login Failed!");
+
+    //             } else {
+    //                 // Login successful, you can redirect or perform other actions
+    //                 setError('');
+    //                 setUser(data);
+
+    //                 alert('Login successful!'); // Display a success message or redirect here
+    //                 await navigate('/HomePage');
+    //             }
+    //         } else {
+
+    //             // Handle login failure here
+    //             setError('Invalid credentials');
+    //             alert('Login failed. Please check your credentials.');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error:', error);
+    //         setError('An error occurred during login. Please try again later.');
+    //     }
+    // };
 
 
     return (
@@ -92,7 +126,7 @@ function Login() {
                                 <span className="h1 fw-bold mb-0">Knightrodex</span>
                             </div>
  
-                            <form style={{ width: '23rem' }} onSubmit={doLogin}>
+                            <form style={{ width: '23rem' }} onSubmit={handleSubmit}>
                                 <h3 className="fw-normal mb-3 pb-3" style={{ letterSpacing: '1px' }}>Log in</h3>
                                 <div className="mb-4">
                                     <label className="form-label" htmlFor="form2Example18">Email address</label>
