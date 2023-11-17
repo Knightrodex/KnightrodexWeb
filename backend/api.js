@@ -149,6 +149,108 @@ exports.setApp = function( app, client )
         }
     });
 
+    app.post('/api/verifyuser', async (req, res) =>
+    {
+      // incoming: userId
+      // outgoing: response if verify user updated or not
+      const { userId } = req.body;
+      let response = { error:'' }
+      try
+      {
+        if (!isValidId(userId))
+        {
+          response.error('User is not valid');
+          res.status(404).json(response);
+        }
+        const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+        if (user.isVerified == true)
+        {
+          response.error('User is already verified.');
+          res.status(404).json(response);
+        }
+        else
+        {
+          userCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: {"isVerified": true }});
+        }
+        res.status(200).json(response);
+      }
+      catch (e)
+      {
+        response.error = e.toString();
+        res.status(500).json(response);
+      }      
+    })
+
+    app.post('/api/passwordsend', async (req, res) => 
+    {
+      // incoming email
+      // outgoing: sends newCode and updates resetCode field for user in db
+      const { email } = req.body;
+      let response = { error:'' }
+      const min = 100001;
+      const max = 999999;
+      const newCode = Math.floor(Math.random() * (max - min + 1)) + min;
+      const msg = {
+        to: email, // Change to your recipient
+        from: 'knightrodex@outlook.com', // Change to your verified sender
+        subject: 'Knightrodex Reset Password',
+        text: 'Type this code into the website to reset your passsword! ' + newCode,
+        html: 'Type this code into the website to reset your passsword! ' + newCode,
+      }
+      userCollection.updateOne(
+        { email: email },
+        { $set: {"resetCode": newCode }});
+      sgMail
+        .send(msg)
+        .then(() => 
+        {
+          console.log('Reset Code Sent!')
+          res.status(200).json(response);
+        })
+        .catch((error) => 
+        {
+          response.error = error.toString();
+          res.status(400).json(response);
+        })
+    })
+
+    app.post('/api/passwordupdate', async (req, res) => 
+    {
+      // incoming: email, userReset, new password
+      // outgoing: updates password
+
+      const { email, userReset, newPassword } = req.body;
+      let response = { error:'' }
+
+      try 
+      {
+        const user = await userCollection.findOne({email: email});
+        
+        if (!user)
+        {
+          response.error= 'User Not Found';
+          return res.status(404).json(response);
+        }
+        if (userReset != user.resetCode)
+        {
+          response.error = 'Incorrect Reset Code';
+          return res.status(404).json(response);
+        }
+        userCollection.updateOne(
+          { email: email },
+          { $set: {"password": newPassword }});
+        res.status(200).json(response);
+        return;
+      }
+      catch (error)
+      {
+        response.error = error.toString();
+        res.status(400).json(response);
+      }
+    })
+
     app.post('/api/addbadge', async (req, res) => 
     {
       // incoming: userId, badgeId
