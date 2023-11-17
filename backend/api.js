@@ -331,7 +331,7 @@ exports.setApp = function( app, client )
       // incoming: email (partial)
       // outgoing: all user info whose email matches partial email
 
-      const { partialEmail, jwtToken } = req.body.email;
+      const { partialEmail, jwtToken } = req.body;
 
       let response = { result:[], jwtToken:'', error:'' };
 
