@@ -74,6 +74,28 @@ exports.setApp = function( app, client )
       return false;
     }
 
+    async function isUserFollowed(requesterUserId, targetUserId)
+    {
+      try
+      {
+        const requester = await userCollection.findOne({ _id: new ObjectId(requesterUserId)});
+        if (requester && requester.usersFollowed)
+        {
+          const usersFollowedStrings = requester.usersFollowed.map(objId => objId.toString());
+          return usersFollowedStrings.includes(targetUserId.toString());
+        }
+        else
+        {
+          return false;
+        }
+      }
+      catch (error)
+      {
+        console.error("Error checking if user is followed:", error);
+        return false;
+      }
+    }
+
     app.post('/api/login', async (req, res) => 
     {
       // incoming: login, password (hashed)
@@ -433,20 +455,28 @@ exports.setApp = function( app, client )
       // incoming: email (partial)
       // outgoing: all user info whose email matches partial email
 
-      const { partialEmail, jwtToken } = req.body;
+      const { partialEmail, requesterUserId } = req.body;
 
-      let response = { result:[], jwtToken:'', error:'' };
-
-      if (isTokenExpired(jwtToken, response, res))
-      {
-        return;
-      }
+      let response = { result:[], error:'' };
 
       try 
       {
-        response.jwtToken = token.refresh(jwtToken);
         const result = await userCollection.find({ email:{$regex:`${partialEmail}`, $options:'i'} }).toArray();
-        response.result = result;
+        for (const user of result)
+        {
+          const userResult = 
+          {
+            _id: user._id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profilePicture: user.profilePicture,
+            isFollowed: await isUserFollowed(requesterUserId, user._id)
+          };
+          response.result.push(userResult);
+        }
+
+        
         res.status(200).json(response);
       }
       catch (error) 
