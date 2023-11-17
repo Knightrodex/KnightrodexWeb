@@ -90,7 +90,7 @@ exports.setApp = function( app, client )
         // User with given credentials exists
         if(user != null)
         {
-          response = token.createToken(user._id, user.firstName, user.lastName, user.email);
+          response.jwtToken = token.createToken(user._id, user.firstName, user.lastName, user.email);
           res.status(200).json(response);
         }
         // Error 400: Invalid Credentials
@@ -110,11 +110,11 @@ exports.setApp = function( app, client )
     app.post('/api/signup', async (req, res) => 
     {
         // incoming: first name, last name, email, password
-        // outgoing: userID, first name, last name
+        // outgoing: userID, first name, last name, email
 
         const { firstName, lastName, email, password } = req.body;
 
-        let response = { accessToken:'', error:'' };
+        let response = { userId:'', firstName:'', lastName:'', email:'', error:'' };
 
         const newUser = { password:password, email:email, badgesObtained:[], 
                           firstName:firstName, lastName:lastName, profilePicture:'', 
@@ -130,14 +130,17 @@ exports.setApp = function( app, client )
             response.error = 'User with the given email already exists';
             res.status(404).json(response);
           }
+
           // Insert new user into the database
-          else
-          {
-            const result = await userCollection.insertOne(newUser);
-            response = token.createToken(result._id, result.firstName, result.lastName, result.email);
-            verifyEmail(email, response, res);
-            res.status(200).json(response);
-          }
+          const result = await userCollection.insertOne(newUser);
+          verifyEmail(email, response, res);
+
+          response.userId = result.insertedId;
+          response.firstName = firstName;
+          response.lastName = lastName;
+          response.email = email;
+
+          res.status(200).json(response);
         }
         catch (e)
         {
