@@ -47,6 +47,7 @@ exports.setApp = function( app, client )
         text: 'Click this link to verify your email! ',
         html: '<strong>and easy to do anywhere, even with Node.js</strong>',
       }
+      
       sgMail
         .send(msg)
         .then(() => 
@@ -175,20 +176,23 @@ exports.setApp = function( app, client )
     {
       // incoming: userId
       // outgoing: response if verify user updated or not
+
       const { userId } = req.body;
       let response = { error:'' }
+
       try
       {
-        if (!isValidId(userId))
+        if (!isValidId(userId, response, res))
         {
-          response.error('User is not valid');
-          res.status(404).json(response);
+          return;
         }
+
         const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+
         if (user.isVerified == true)
         {
           response.error('User is already verified.');
-          res.status(404).json(response);
+          res.status(500).json(response);
         }
         else
         {
@@ -196,6 +200,7 @@ exports.setApp = function( app, client )
             { _id: new ObjectId(userId) },
             { $set: {"isVerified": true }});
         }
+
         res.status(200).json(response);
       }
       catch (e)
@@ -209,11 +214,14 @@ exports.setApp = function( app, client )
     {
       // incoming email
       // outgoing: sends newCode and updates resetCode field for user in db
+
       const { email } = req.body;
       let response = { error:'' }
+
       const min = 100001;
       const max = 999999;
       const newCode = Math.floor(Math.random() * (max - min + 1)) + min;
+
       const msg = {
         to: email, // Change to your recipient
         from: 'knightrodex@outlook.com', // Change to your verified sender
@@ -221,9 +229,11 @@ exports.setApp = function( app, client )
         text: 'Type this code into the website to reset your passsword! ' + newCode,
         html: 'Type this code into the website to reset your passsword! ' + newCode,
       }
+
       userCollection.updateOne(
         { email: email },
         { $set: {"resetCode": newCode }});
+
       sgMail
         .send(msg)
         .then(() => 
@@ -250,26 +260,31 @@ exports.setApp = function( app, client )
       {
         const user = await userCollection.findOne({email: email});
         
+        // User not found
         if (!user)
         {
           response.error= 'User Not Found';
           return res.status(404).json(response);
         }
-        if (userReset != user.resetCode)
+        // User entered incorrect reset code
+        else if (userReset != user.resetCode)
         {
           response.error = 'Incorrect Reset Code';
           return res.status(404).json(response);
         }
+
+        // Update password in database
         userCollection.updateOne(
           { email: email },
           { $set: {"password": newPassword }});
+
         res.status(200).json(response);
         return;
       }
       catch (error)
       {
         response.error = error.toString();
-        res.status(400).json(response);
+        res.status(500).json(response);
       }
     })
 
@@ -452,16 +467,29 @@ exports.setApp = function( app, client )
 
     app.post('/api/searchemail', async (req, res) => 
     {
-      // incoming: email (partial)
+      // incoming: requester user id, email (partial)
       // outgoing: all user info whose email matches partial email
 
-      const { partialEmail, requesterUserId } = req.body;
+      const { requesterUserId, partialEmail, jwtToken } = req.body;
 
-      let response = { result:[], error:'' };
+      let response = { result:[], jwtToken:'', error:'' };
+
+      if (isTokenExpired(jwtToken, response, res))
+      {
+        return;
+      }
+
+      if (!isValidId(requesterUserId, response, res))
+      {
+        return;
+      }
 
       try 
       {
+        response.jwtToken = token.refresh(jwtToken);
+
         const result = await userCollection.find({ email:{$regex:`${partialEmail}`, $options:'i'} }).toArray();
+
         for (const user of result)
         {
           const userResult = 
@@ -473,9 +501,9 @@ exports.setApp = function( app, client )
             profilePicture: user.profilePicture,
             isFollowed: await isUserFollowed(requesterUserId, user._id)
           };
+
           response.result.push(userResult);
         }
-
         
         res.status(200).json(response);
       }
