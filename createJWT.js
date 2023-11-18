@@ -10,10 +10,8 @@ exports.createToken = function(id, fn, ln, em)
 
 _createToken = function(id, fn, ln, em)
 {
-    let response = {jwtToken:'', error:''};
     try
     {
-        const expiration = new Date();
         const user = {userId:id, firstName:fn, lastName:ln, email:em};
 
         const jwtToken = jwt.sign(user, process.env.JWT_KEY,
@@ -21,14 +19,13 @@ _createToken = function(id, fn, ln, em)
                 expiresIn:EXPIRATION_TIME
             });
 
-        response.jwtToken = jwtToken;
+        return jwtToken;
     }
     catch (error)
     {
-        response.error = error.toString();
+        console.log(error.toString())
+        return "";
     }
-
-    return response;
 }
 
 exports.isExpired = function(token)

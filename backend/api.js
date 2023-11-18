@@ -47,6 +47,7 @@ exports.setApp = function( app, client )
         text: 'Click this link to verify your email! ',
         html: '<strong>and easy to do anywhere, even with Node.js</strong>',
       }
+      
       sgMail
         .send(msg)
         .then(() => 
@@ -74,6 +75,28 @@ exports.setApp = function( app, client )
       return false;
     }
 
+    async function isUserFollowed(requesterUserId, targetUserId)
+    {
+      try
+      {
+        const requester = await userCollection.findOne({ _id: new ObjectId(requesterUserId)});
+        if (requester && requester.usersFollowed)
+        {
+          const usersFollowedStrings = requester.usersFollowed.map(objId => objId.toString());
+          return usersFollowedStrings.includes(targetUserId.toString());
+        }
+        else
+        {
+          return false;
+        }
+      }
+      catch (error)
+      {
+        console.error("Error checking if user is followed:", error);
+        return false;
+      }
+    }
+
     app.post('/api/login', async (req, res) => 
     {
       // incoming: login, password (hashed)
@@ -90,7 +113,7 @@ exports.setApp = function( app, client )
         // User with given credentials exists
         if(user != null)
         {
-          response = token.createToken(user._id, user.firstName, user.lastName, user.email);
+          response.jwtToken = token.createToken(user._id, user.firstName, user.lastName, user.email);
           res.status(200).json(response);
         }
         // Error 400: Invalid Credentials
@@ -110,11 +133,11 @@ exports.setApp = function( app, client )
     app.post('/api/signup', async (req, res) => 
     {
         // incoming: first name, last name, email, password
-        // outgoing: userID, first name, last name
+        // outgoing: userID, first name, last name, email
 
         const { firstName, lastName, email, password } = req.body;
 
-        let response = { accessToken:'', error:'' };
+        let response = { userId:'', firstName:'', lastName:'', email:'', error:'' };
 
         const newUser = { password:password, email:email, badgesObtained:[], 
                           firstName:firstName, lastName:lastName, profilePicture:'', 
@@ -130,14 +153,17 @@ exports.setApp = function( app, client )
             response.error = 'User with the given email already exists';
             res.status(404).json(response);
           }
+
           // Insert new user into the database
-          else
-          {
-            const result = await userCollection.insertOne(newUser);
-            response = token.createToken(result._id, result.firstName, result.lastName, result.email);
-            verifyEmail(email, response, res);
-            res.status(200).json(response);
-          }
+          const result = await userCollection.insertOne(newUser);
+          verifyEmail(email, response, res);
+
+          response.userId = result.insertedId;
+          response.firstName = firstName;
+          response.lastName = lastName;
+          response.email = email;
+
+          res.status(200).json(response);
         }
         catch (e)
         {
@@ -145,6 +171,122 @@ exports.setApp = function( app, client )
           res.status(500).json(response);
         }
     });
+
+    app.post('/api/verifyuser', async (req, res) =>
+    {
+      // incoming: userId
+      // outgoing: response if verify user updated or not
+
+      const { userId } = req.body;
+      let response = { error:'' }
+
+      try
+      {
+        if (!isValidId(userId, response, res))
+        {
+          return;
+        }
+
+        const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+
+        if (user.isVerified == true)
+        {
+          response.error('User is already verified.');
+          res.status(500).json(response);
+        }
+        else
+        {
+          userCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: {"isVerified": true }});
+        }
+
+        res.status(200).json(response);
+      }
+      catch (e)
+      {
+        response.error = e.toString();
+        res.status(500).json(response);
+      }      
+    })
+
+    app.post('/api/passwordsend', async (req, res) => 
+    {
+      // incoming email
+      // outgoing: sends newCode and updates resetCode field for user in db
+
+      const { email } = req.body;
+      let response = { error:'' }
+
+      const min = 100001;
+      const max = 999999;
+      const newCode = Math.floor(Math.random() * (max - min + 1)) + min;
+
+      const msg = {
+        to: email, // Change to your recipient
+        from: 'knightrodex@outlook.com', // Change to your verified sender
+        subject: 'Knightrodex Reset Password',
+        text: 'Type this code into the website to reset your passsword! ' + newCode,
+        html: 'Type this code into the website to reset your passsword! ' + newCode,
+      }
+
+      userCollection.updateOne(
+        { email: email },
+        { $set: {"resetCode": newCode }});
+
+      sgMail
+        .send(msg)
+        .then(() => 
+        {
+          console.log('Reset Code Sent!')
+          res.status(200).json(response);
+        })
+        .catch((error) => 
+        {
+          response.error = error.toString();
+          res.status(400).json(response);
+        })
+    })
+
+    app.post('/api/passwordupdate', async (req, res) => 
+    {
+      // incoming: email, userReset, new password
+      // outgoing: updates password
+
+      const { email, userReset, newPassword } = req.body;
+      let response = { error:'' }
+
+      try 
+      {
+        const user = await userCollection.findOne({email: email});
+        
+        // User not found
+        if (!user)
+        {
+          response.error= 'User Not Found';
+          return res.status(404).json(response);
+        }
+        // User entered incorrect reset code
+        else if (userReset != user.resetCode)
+        {
+          response.error = 'Incorrect Reset Code';
+          return res.status(404).json(response);
+        }
+
+        // Update password in database
+        userCollection.updateOne(
+          { email: email },
+          { $set: {"password": newPassword }});
+
+        res.status(200).json(response);
+        return;
+      }
+      catch (error)
+      {
+        response.error = error.toString();
+        res.status(500).json(response);
+      }
+    })
 
     app.post('/api/addbadge', async (req, res) => 
     {
@@ -325,10 +467,10 @@ exports.setApp = function( app, client )
 
     app.post('/api/searchemail', async (req, res) => 
     {
-      // incoming: email (partial)
+      // incoming: requester user id, email (partial)
       // outgoing: all user info whose email matches partial email
 
-      const { partialEmail, jwtToken } = req.body.email;
+      const { requesterUserId, partialEmail, jwtToken } = req.body;
 
       let response = { result:[], jwtToken:'', error:'' };
 
@@ -337,11 +479,32 @@ exports.setApp = function( app, client )
         return;
       }
 
+      if (!isValidId(requesterUserId, response, res))
+      {
+        return;
+      }
+
       try 
       {
         response.jwtToken = token.refresh(jwtToken);
+
         const result = await userCollection.find({ email:{$regex:`${partialEmail}`, $options:'i'} }).toArray();
-        response.result = result;
+
+        for (const user of result)
+        {
+          const userResult = 
+          {
+            _id: user._id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profilePicture: user.profilePicture,
+            isFollowed: await isUserFollowed(requesterUserId, user._id)
+          };
+
+          response.result.push(userResult);
+        }
+        
         res.status(200).json(response);
       }
       catch (error) 
