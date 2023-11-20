@@ -7,7 +7,6 @@ import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import React, { useState, useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
-import { UserContext } from '../UserContext';
 import { useNavigate } from 'react-router-dom';
 import ForgotPasswordBox from '../components/ForgotPasswordBox';
 import axios from 'axios';
@@ -32,7 +31,6 @@ function Login() {
     const [loginUsername, setLoginUsername] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [error, setError] = useState('');
-    const { user, setUser } = useContext(UserContext);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
