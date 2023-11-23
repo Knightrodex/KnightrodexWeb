@@ -44,22 +44,22 @@ exports.setApp = function( app, client )
         to: email, // Change to your recipient
         from: 'knightrodex@outlook.com', // Change to your verified sender
         subject: 'Knightrodex Verify Email',
-        text: 'Click this link to verify your email! ',
-        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+        text: 'Click this link to verify your email!'
       }
-      
+
       sgMail
         .send(msg)
         .then(() => 
         {
-          console.log('Verification Email Sent!')
-          res.status(200).json(response);
+          console.log('Verification Email Sent!');
         })
-        .catch((error) => 
+        .catch((error) =>
         {
           response.error = error.toString();
-          res.status(400).json(response);
-        })
+          return false;
+        });
+
+      return true;
     }
 
     // check if a given JWT is expired
@@ -110,18 +110,23 @@ exports.setApp = function( app, client )
       {
         const user = await userCollection.findOne({ email:email, password:password });
 
-        // User with given credentials exists
-        if(user != null)
-        {
-          response.jwtToken = token.createToken(user._id, user.firstName, user.lastName, user.email);
-          res.status(200).json(response);
-        }
-        // Error 400: Invalid Credentials
-        else
+        // User DNE
+        if (user == null)
         {
           response.error = 'Invalid credentials';
           res.status(400).json(response);
+          return;
         }
+        // User not Verified
+        else if (!user.isVerified)
+        {
+          response.error = 'User is not verified';
+          res.status(500).json(response);
+          return;
+        }
+
+        response.jwtToken = token.createToken(user._id, user.firstName, user.lastName, user.email);
+        res.status(200).json(response);
       }
       catch (error)
       {
@@ -141,7 +146,7 @@ exports.setApp = function( app, client )
 
         const newUser = { password:password, email:email, badgesObtained:[], 
                           firstName:firstName, lastName:lastName, profilePicture:'', 
-                          usersFollowed:[], dateCreated:(new Date()) };
+                          usersFollowed:[], dateCreated:(new Date()), resetCode:0, isVerified:false };
 
         try
         {
@@ -156,7 +161,13 @@ exports.setApp = function( app, client )
 
           // Insert new user into the database
           const result = await userCollection.insertOne(newUser);
-          verifyEmail(email, response, res);
+          const emailStatus = verifyEmail(email, response, res);
+
+          if (emailStatus == false)
+          {
+            res.status(500).json(response);
+            return;
+          }
 
           response.userId = result.insertedId;
           response.firstName = firstName;
@@ -189,7 +200,7 @@ exports.setApp = function( app, client )
 
         const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
-        if (user.isVerified == true)
+        if (user.isVerified)
         {
           response.error('User is already verified.');
           res.status(500).json(response);
@@ -217,6 +228,25 @@ exports.setApp = function( app, client )
 
       const { email } = req.body;
       let response = { error:'' }
+
+      try
+      {
+        // Ensure user with the given email exists in databse
+        const user = userCollection.findOne({ email:email });
+
+        if (user == null)
+        {
+          response.error = 'User with given email does not exist';
+          res.status(500).json(response);
+          return;
+        }
+      }
+      catch (error)
+      {
+        response.error = error.toString();
+        res.status(500).json(response);
+        return;
+      }
 
       const min = 100001;
       const max = 999999;
@@ -492,9 +522,15 @@ exports.setApp = function( app, client )
 
         for (const user of result)
         {
+          // Exclude requester from search result
+          if (user._id == requesterUserId)
+          {
+            continue;
+          }
+
           const userResult = 
           {
-            _id: user._id,
+            userId: user._id,
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
