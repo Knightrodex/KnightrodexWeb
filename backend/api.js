@@ -231,8 +231,8 @@ exports.setApp = function( app, client )
 
       try
       {
-        // Ensure user with the given email exists in databse
-        const user = userCollection.findOne({ email:email });
+        // Ensure user with the given email exists in database
+        const user = await userCollection.findOne({ email:email });
 
         if (user == null)
         {
@@ -288,7 +288,7 @@ exports.setApp = function( app, client )
 
       try 
       {
-        const user = await userCollection.findOne({email: email});
+        const user = await userCollection.findOne({ email:email});
         
         // User not found
         if (!user)
