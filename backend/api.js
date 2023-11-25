@@ -805,7 +805,7 @@ exports.setApp = function( app, client )
           for (const badgeCollected of followedUser.badgesObtained)
           {
             const badgeInfo = await badgeCollection.findOne({ _id:new ObjectId(badgeCollected.badgeId) });
-            const activityInfo = {firstName:followedUser.firstName, lastName:followedUser.lastName, profilePicture:followedUser.profilePicture,
+            const activityInfo = {email:followedUser.email, firstName:followedUser.firstName, lastName:followedUser.lastName, profilePicture:followedUser.profilePicture,
                                   badgeId:badgeCollected.badgeId, badgeTitle:badgeInfo.title,
                                   dateObtained:badgeCollected.dateObtained};
             response.activity.push(activityInfo);
