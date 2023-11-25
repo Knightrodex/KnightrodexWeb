@@ -762,7 +762,7 @@ exports.setApp = function( app, client )
 
       if (isTokenExpired(jwtToken))
       {
-        return;
+        // return;
       }
 
       if (!isValidId(userId, response, res))
