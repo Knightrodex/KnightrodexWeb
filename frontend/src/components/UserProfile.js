@@ -1,19 +1,11 @@
 import React from 'react'
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
- import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import dayjs from 'dayjs';
+import relativeTime from "dayjs/plugin/relativeTime"; 
 
 function UserProfile({ userData }) {
-    // const {
-    //     name,
-    //     location,
-    //     photos,
-    //     followers,
-    //     following,
-    //     about,
-    //     recentPhotos,
-    // } = userData2;
-
     const {
         userId,
         firstName,
@@ -26,8 +18,14 @@ function UserProfile({ userData }) {
         error
     } = userData;
 
-    console.log("kjbsdfjksdfbjkldbs");
-    console.log(userData);
+    const recentPhotos = [
+        'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp',
+        'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(107).webp',
+        'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(108).webp',
+        'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(114).webp',
+    ];
+
+    dayjs.extend(relativeTime);
 
     return (
         <section className="h-100 gradient-custom-2">
@@ -75,7 +73,7 @@ function UserProfile({ userData }) {
                                     <p className="lead fw-normal mb-1">About</p>
                                     <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
                                         <p className="font-italic mb-1">
-                                            Created on { dateCreated }
+                                            Created { dayjs(dateCreated).fromNow() }
                                         </p>
                                         {/* {about.map((item, index) => (
                                             <p className="font-italic mb-1" key={index}>
@@ -85,7 +83,7 @@ function UserProfile({ userData }) {
                                     </div>
                                 </div>
                                 <div className="d-flex justify-content-between align-items-center mb-4">
-                                    <p className="lead fw-normal mb-0">Recent badges</p>
+                                    <p className="lead fw-normal mb-0">Badges Found</p>
                                     <p className="mb-0">
                                         <a href="#!" className="text-muted">
                                             Show all
@@ -93,11 +91,11 @@ function UserProfile({ userData }) {
                                     </p>
                                 </div>
                                 <div className="row g-2">
-                                    {/* {recentPhotos.map((photo, index) => (
+                                    {recentPhotos.map((photo, index) => (
                                         <div className="col mb-2" key={index}>
                                             <img src={photo} alt={`image ${index + 1}`} className="w-100 rounded-3" />
                                         </div>
-                                    ))} */}
+                                    ))}
                                 </div>
                             </div>
                         </div>
