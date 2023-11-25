@@ -236,7 +236,7 @@ exports.setApp = function( app, client )
 
         if (user == null)
         {
-          response.error = 'User with given email does not exist';
+          response.error = 'Error trying to send password';
           res.status(500).json(response);
           return;
         }
@@ -473,7 +473,8 @@ exports.setApp = function( app, client )
           const badgeCollectedInfo = {
             _id: badgeInfo._id,
             title: badgeInfo.title,
-            location: badgeInfo.collection,
+            location: badgeInfo.location,
+            coordinates: badgeInfo.coordinates,
             dateCreated: badgeInfo.dateCreated,
             dateExpired: badgeInfo.dateExpired,
             description: badgeInfo.description,
@@ -803,8 +804,9 @@ exports.setApp = function( app, client )
           // Iterate through the followed user's badges and add data to the activity list
           for (const badgeCollected of followedUser.badgesObtained)
           {
-            const activityInfo = {firstName: followedUser.firstName, lastName: followedUser.lastName,
-                                  badgeId: badgeCollected.badgeId, dateObtained: badgeCollected.dateObtained};
+            const activityInfo = {firstName:followedUser.firstName, lastName:followedUser.lastName, profilePicture:followedUser.profilePicture,
+                                  badgeId:badgeCollected.badgeId, badgeName:badgeCollected.title, 
+                                  dateObtained:badgeCollected.dateObtained};
             response.activity.push(activityInfo);
           };
         }
