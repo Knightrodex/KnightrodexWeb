@@ -804,8 +804,9 @@ exports.setApp = function( app, client )
           // Iterate through the followed user's badges and add data to the activity list
           for (const badgeCollected of followedUser.badgesObtained)
           {
+            const badgeInfo = await badgeCollection.findOne({ _id:new ObjectId(badgeCollected.badgeId) });
             const activityInfo = {firstName:followedUser.firstName, lastName:followedUser.lastName, profilePicture:followedUser.profilePicture,
-                                  badgeId:badgeCollected.badgeId, badgeName:badgeCollected.title, 
+                                  badgeId:badgeCollected.badgeId, badgeTitle:badgeInfo.title,
                                   dateObtained:badgeCollected.dateObtained};
             response.activity.push(activityInfo);
           };
