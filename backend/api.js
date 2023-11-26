@@ -848,7 +848,7 @@ exports.setApp = function( app, client )
 
         if (currUser == null)
         {
-          response.error = 'User ' + userId + ' Not Found';
+          response.error = 'User Not Found';
           res.status(500).json(response);
           return;
         }
@@ -866,7 +866,7 @@ exports.setApp = function( app, client )
           // Verify Followed User is in database
           if (followedUser == null)
           {
-            response.error = 'User ' + followedUserId + ' Not Found';
+            response.error = 'Followed User Not Found';
             res.status(404).json(response);
             return;
           }
