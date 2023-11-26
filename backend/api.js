@@ -900,7 +900,7 @@ exports.setApp = function( app, client )
 
     });
 
-    app.post('/api/uploadprofilepicture', async (req, res) =>
+    app.post('/api/updateprofilepicture', async (req, res) =>
     {
       // incoming: userId, pfp link
       // outgoing: error
