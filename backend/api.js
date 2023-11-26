@@ -327,21 +327,29 @@ exports.setApp = function( app, client )
 
       const { userId, badgeId, jwtToken } = req.body;
 
-      if (isTokenExpired(jwtToken, response, res))
+      // Preliminary Checks
+      try
       {
-        return;
-      }
+        if (isTokenExpired(jwtToken, response, res))
+        {
+          return;
+        }
 
-      // Verify IDs are valid ObjectIds
-      if (!isValidId(userId, response, res) || !isValidId(badgeId, response, res))
+        // Verify IDs are valid ObjectIds
+        if (!isValidId(userId, response, res) || !isValidId(badgeId, response, res))
+        {
+          return;
+        }
+      }
+      catch (error)
       {
+        response.error = error.toString();
+        res.status(500).json(response);
         return;
       }
       
       try 
       {
-          response.jwtToken = token.refresh(jwtToken);
-
           const badgeInfo = await badgeCollection.findOne({ _id:new ObjectId(badgeId) });
           const userInfo = await userCollection.findOne({ _id:new ObjectId(userId) });
 
@@ -387,6 +395,7 @@ exports.setApp = function( app, client )
               { _id: new ObjectId(badgeId) },
               { $set: {"numObtained": (badgeInfo.numObtained + 1)}});
 
+              response.jwtToken = token.refresh(jwtToken);
               res.status(200).json(response);
           }
           else
@@ -421,20 +430,28 @@ exports.setApp = function( app, client )
         error:''
       }
 
-      if (isTokenExpired(jwtToken, response, res))
+      // Preliminary Checks
+      try
       {
-        return;
-      }
+        if (isTokenExpired(jwtToken, response, res))
+        {
+          return;
+        }
 
-      if (!isValidId(userId, response, res))
+        if (!isValidId(userId, response, res))
+        {
+          return;
+        }
+      }
+      catch (error)
       {
+        response.error = error.toString();
+        res.status(500).json(response);
         return;
       }
 
       try
       {
-        response.jwtToken = token.refresh(jwtToken);
-
         const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
         if (user == null) 
@@ -487,6 +504,7 @@ exports.setApp = function( app, client )
           response.badgesCollected.push(badgeCollectedInfo);
         }
 
+        response.jwtToken = token.refresh(jwtToken);
         res.status(200).json(response);
       }
       catch (error)
@@ -505,20 +523,36 @@ exports.setApp = function( app, client )
 
       let response = { result:[], jwtToken:'', error:'' };
 
-      if (isTokenExpired(jwtToken, response, res))
+      try
       {
-        return;
-      }
+        if (isTokenExpired(jwtToken, response, res))
+        {
+          return;
+        }
 
-      if (!isValidId(requesterUserId, response, res))
+        if (!isValidId(requesterUserId, response, res))
+        {
+          return;
+        }
+
+        const requester = await userCollection.findOne({ _id:new ObjectId(requesterUserId) });
+
+        if (requester == null)
+        {
+          response.error = 'Requesting User not found';
+          res.status(500).json(response);
+          return;
+        }
+      }
+      catch (error)
       {
+        response.error = error.toString();
+        res.status(500).json(response);
         return;
       }
 
       try 
       {
-        response.jwtToken = token.refresh(jwtToken);
-
         const result = await userCollection.find({ email:{$regex:`${partialEmail}`, $options:'i'} }).toArray();
 
         for (const user of result)
@@ -542,6 +576,7 @@ exports.setApp = function( app, client )
           response.result.push(userResult);
         }
         
+        response.jwtToken = token.refresh(jwtToken);
         res.status(200).json(response);
       }
       catch (error) 
@@ -560,28 +595,36 @@ exports.setApp = function( app, client )
 
       let response = { jwtToken:'', error:'' };
 
-      if (isTokenExpired(jwtToken, response, res))
+      // Preliminary Checks
+      try
       {
-        return;
-      }
+        if (isTokenExpired(jwtToken, response, res))
+        {
+          return;
+        }
 
-      if (!isValidId(currentUserId, response, res) || !isValidId(otherUserId, response, res))
-      {
-        return;
-      }
+        if (!isValidId(currentUserId, response, res) || !isValidId(otherUserId, response, res))
+        {
+          return;
+        }
 
-      // Ensure user does not try to follow themself
-      if (currentUserId === otherUserId)
+        // Ensure user does not try to follow themself
+        if (currentUserId === otherUserId)
+        {
+          response.error = 'Current User cannot try to follow themself';
+          res.status(500).json(response);
+          return;
+        }
+      }
+      catch (error)
       {
-        response.error = 'Current User cannot try to follow themself';
+        response.error = error.toString();
         res.status(500).json(response);
         return;
       }
 
       try
       {
-        response.jwtToken = token.refresh(jwtToken);
-
         // Find both users in the collection
         const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
         const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
@@ -589,13 +632,13 @@ exports.setApp = function( app, client )
         // Verify both users exist in database
         if (currentUser == null)
         {
-          response.error = 'User ' + currentUserId + ' Not Found';
+          response.error = 'Current User Not Found';
           res.status(404).json(response);
           return;
         }
         else if (otherUser == null)
         {
-          response.error = 'User ' + otherUserId + ' Not Found';
+          response.error = 'Other User Not Found';
           res.status(404).json(response);
           return;
         }
@@ -603,7 +646,7 @@ exports.setApp = function( app, client )
         // If current user is not following other user, add other user to current user's usersFollowed list
         if (currentUser.usersFollowed.some(userId => userId.equals(otherUserId)))
         {
-          response.error = 'User ' + currentUserId + 'Already Follows User ' + otherUserId;
+          response.error = 'User already follows other user';
           res.status(500).json(response);
         }
         else
@@ -613,6 +656,7 @@ exports.setApp = function( app, client )
             { $push: {"usersFollowed": new ObjectId(otherUserId)}}
           );
 
+          response.jwtToken = token.refresh(jwtToken);
           res.status(200).json(response);
         }
       }
@@ -633,28 +677,36 @@ exports.setApp = function( app, client )
 
       let response = { jwtToken:'', error: '' };
 
-      if (isTokenExpired(jwtToken, response, res))
+      // Preliminary Checks
+      try
       {
-        return;
-      }
+        if (isTokenExpired(jwtToken, response, res))
+        {
+          return;
+        }
 
-      if (!isValidId(currentUserId, response, res) || !isValidId(otherUserId, response, res))
-      {
-        return;
-      }
+        if (!isValidId(currentUserId, response, res) || !isValidId(otherUserId, response, res))
+        {
+          return;
+        }
 
-      // Ensure user does not try to unfollow themself
-      if (currentUserId === otherUserId)
+        // Ensure user does not try to unfollow themself
+        if (currentUserId === otherUserId)
+        {
+          response.error = 'Current User cannot Unfollow themself';
+          res.status(500).json(response);
+          return;
+        }
+      }
+      catch (error)
       {
-        response.error = 'Current User cannot Unfollow themself';
+        response.error = error.toString();
         res.status(500).json(response);
         return;
       }
 
       try
       {
-        response.jwtToken = token.refresh(jwtToken);
-
         // Find both users in the collection
         const currentUser = await userCollection.findOne({ _id: new ObjectId(currentUserId) });
         const otherUser = await userCollection.findOne({ _id: new ObjectId(otherUserId) });
@@ -681,6 +733,7 @@ exports.setApp = function( app, client )
             { $pull: {"usersFollowed": new ObjectId(otherUserId)}}
           );
 
+          response.jwtToken = token.refresh(jwtToken);
           res.status(200).json(response);
         }
         else
@@ -706,27 +759,35 @@ exports.setApp = function( app, client )
 
       let response = { hints:[], jwtToken:'', error:''};
 
-      if (isTokenExpired(jwtToken, response, res))
+      // Preliminary Checks
+      try
       {
-        return;
-      }
+        if (isTokenExpired(jwtToken, response, res))
+        {
+          return;
+        }
 
-      if (!isValidId(userId, response, res))
+        if (!isValidId(userId, response, res))
+        {
+          return;
+        }
+      }
+      catch (error)
       {
+        response.error = error.toString();
+        res.status(500).json(response);
         return;
       }
 
       try
       {
-        response.jwtToken = token.refresh(jwtToken);
-
         const user = await userCollection.findOne({_id: new ObjectId(userId)});
         const allBadges = await badgeCollection.find().toArray(); // Return all badges in collection as array
 
         // Verify User exists in database
         if (user == null)
         {
-          response.error = 'User ' + userId + ' Not Found';
+          response.error = 'User Not Found';
           res.status(404).json(response);
           return;
         }
@@ -741,6 +802,7 @@ exports.setApp = function( app, client )
           }
         }
 
+        response.jwtToken = token.refresh(jwtToken);
         res.status(200).json(response);
       }
       catch (error)
@@ -760,20 +822,28 @@ exports.setApp = function( app, client )
 
       let response = { activity:[], jwtToken:'', error:'' };
 
-      if (isTokenExpired(jwtToken, response, res))
+      // Preliminary Checks
+      try
       {
-        return;
-      }
+        if (isTokenExpired(jwtToken, response, res))
+        {
+          return;
+        }
 
-      if (!isValidId(userId, response, res))
+        if (!isValidId(userId, response, res))
+        {
+          return;
+        }
+      }
+      catch (error)
       {
+        response.error = error.toString();
+        res.status(500).json(response);
         return;
       }
 
       try
       {
-        response.jwtToken = token.refresh(jwtToken);
-
         const currUser = await userCollection.findOne({ _id:new ObjectId(userId) });
 
         if (currUser == null)
@@ -818,6 +888,7 @@ exports.setApp = function( app, client )
           return b.dateObtained - a.dateObtained;
         })
 
+        response.jwtToken = token.refresh(jwtToken);
         res.status(200).json(response);
 
       }
@@ -837,25 +908,34 @@ exports.setApp = function( app, client )
       const { userId, profilePicture, jwtToken } = req.body;
       let response = { jwtToken:'', error:'' };
 
-      if (isTokenExpired(jwtToken, response, res))
+      // Preliminary Checks
+      try
       {
-        return;
+        if (isTokenExpired(jwtToken, response, res))
+        {
+          return;
+        }
+  
+        if (!isValidId(userId, response, res))
+        {
+          return;
+        }
       }
-
-      if (!isValidId(userId, response, res))
+      catch (error)
       {
+        response.error = error.toString();
+        res.status(500).json(response);
         return;
       }
 
       try
       {
-        response.jwtToken = token.refresh(jwtToken);
-
         userCollection.updateOne(
           { _id:new ObjectId(userId) },
           { $set: {'profilePicture':profilePicture} }
         );
 
+        response.jwtToken = token.refresh(jwtToken);
         res.status(200).json(response);
       }
       catch (error)
