@@ -633,7 +633,7 @@ exports.setApp = function( app, client )
 
       let response = { jwtToken:'', error: '' };
 
-      if (isTokenExpired(jwtToken))
+      if (isTokenExpired(jwtToken, response, res))
       {
         return;
       }
@@ -706,7 +706,7 @@ exports.setApp = function( app, client )
 
       let response = { hints:[], jwtToken:'', error:''};
 
-      if (isTokenExpired(jwtToken))
+      if (isTokenExpired(jwtToken, response, res))
       {
         return;
       }
@@ -760,7 +760,7 @@ exports.setApp = function( app, client )
 
       let response = { activity:[], jwtToken:'', error:'' };
 
-      if (isTokenExpired(jwtToken))
+      if (isTokenExpired(jwtToken, response, res))
       {
         return;
       }
@@ -828,4 +828,40 @@ exports.setApp = function( app, client )
       }
 
     });
+
+    app.post('/api/uploadprofilepicture', async (req, res) =>
+    {
+      // incoming: userId, pfp link
+      // outgoing: error
+
+      const { userId, profilePicture, jwtToken } = req.body;
+      let response = { jwtToken:'', error:'' };
+
+      if (isTokenExpired(jwtToken, response, res))
+      {
+        return;
+      }
+
+      if (!isValidId(userId, response, res))
+      {
+        return;
+      }
+
+      try
+      {
+        response.jwtToken = token.refresh(jwtToken);
+
+        userCollection.updateOne(
+          { _id:new ObjectId(userId) },
+          { $set: {'profilePicture':profilePicture} }
+        );
+
+        res.status(200).json(response);
+      }
+      catch (error)
+      {
+        response.error = error.toString();
+        res.status(500).json(response);
+      }
+    }); 
 }
