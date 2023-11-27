@@ -19,6 +19,7 @@ const client = new MongoClient(url);
 client.connect();
 
 let api = require('./api.js');
+const { builtinModules } = require('module');
 api.setApp(app, client);
 
 app.set('port', (process.env.PORT || 5000));
@@ -43,3 +44,5 @@ if (process.env.NODE_ENV === 'production')
     res.sendFile(path.resolve('frontend', 'build', 'index.html'));
   });
 }
+
+module.exports = app;

@@ -20,8 +20,6 @@ function UserProfile({ userData }) {
         error
     } = userData;
 
-    console.log(userData);
-
     dayjs.extend(relativeTime);
 
     return (
@@ -59,10 +57,6 @@ function UserProfile({ userData }) {
                                         <p className="mb-1 h5">{(usersFollowed == null) ? 0 : usersFollowed.length}</p>
                                         <p className="small text-muted mb-0">Following</p>
                                     </div>
-                                    {/* <div>
-                                        <p className="mb-1 h5">{following}</p>
-                                        <p className="small text-muted mb-0">Following</p>
-                                    </div> */}
                                 </div>
                             </div>
                             <div className="card-body p-4 text-black">
@@ -86,12 +80,6 @@ function UserProfile({ userData }) {
                                     </p>
                                 </div>
                                 <div className="row g-2" id="img-wrapper" style={{ backgroundColor: '#f8f9fa' }}>
-                                    { (badgesCollected.length == 0) ? <p>Wow much empty, go find some badges</p> : badgesCollected.map((badge, index) => (
-                                        <div className="col mb-2" key={index} data-tooltip-id="my-tooltip" data-tooltip-float="true" data-tooltip-html={"<h4>" + badge.title + "</h4><em>" + badge.description + "</em><br /><br />" + "Collected " + dayjs(badge.dateObtained).fromNow() + "<br />" + "Location found: " + badge.location + "<br />" + "Number " +  badge.uniqueNumber + " of " + badge.limit}>
-                                            <img src={badge.badgeImage} alt={`image ${index + 1}`} className="w-100 rounded-3" />
-                                            <Tooltip id="my-tooltip" />
-                                        </div>
-                                    ))}
                                     { (badgesCollected.length == 0) ? <p>Wow much empty, go find some badges</p> : badgesCollected.map((badge, index) => (
                                         <div className="col mb-2" key={index} data-tooltip-id="my-tooltip" data-tooltip-float="true" data-tooltip-html={"<h4>" + badge.title + "</h4><em>" + badge.description + "</em><br /><br />" + "Collected " + dayjs(badge.dateObtained).fromNow() + "<br />" + "Location found: " + badge.location + "<br />" + "Number " +  badge.uniqueNumber + " of " + badge.limit}>
                                             <img src={badge.badgeImage} alt={`image ${index + 1}`} className="w-100 rounded-3" />

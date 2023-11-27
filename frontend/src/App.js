@@ -8,6 +8,7 @@ import ProfilePage from './pages/ProfilePage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import RouteGuard from './components/RouteGuard';
 import { setAuthToken } from './components/setAuthToken';
+import VerifyUserPage from './pages/VerifyUserPage';
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
   }
 
   return (
+<<<<<<< HEAD
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
@@ -31,6 +33,24 @@ function App() {
         <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
       </Routes>
     </BrowserRouter>
+=======
+    <UserContext.Provider value={{ user, setUser }}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/SignUp" element={<SignUpPage />} />
+          <Route path="/HomePage" element={<RouteGuard />}>
+            <Route path="/HomePage" element={<HomePage />} />
+          </Route>
+          <Route path="/ProfilePage" element={<RouteGuard />}>
+            <Route path="/ProfilePage" element={<ProfilePage />} />
+          </Route>
+          <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
+          <Route path="/VerifyUserPage" element={<VerifyUserPage />} />
+        </Routes>
+      </BrowserRouter>
+    </UserContext.Provider>
+>>>>>>> 6559aaa8cbe836ca49112e905ee328a44e6a2e91
   );
 }
 export default App;

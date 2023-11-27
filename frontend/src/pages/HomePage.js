@@ -19,7 +19,7 @@ function HomePage() {
     return (
         <>
             <Navbar />
-            <SearchBar users={initialUsers} />
+            <SearchBar users />
             <Activities />
         </>
     );
