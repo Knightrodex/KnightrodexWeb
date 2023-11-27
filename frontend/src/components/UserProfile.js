@@ -3,7 +3,9 @@ import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
-import relativeTime from "dayjs/plugin/relativeTime"; 
+import relativeTime from "dayjs/plugin/relativeTime";
+import { Tooltip } from 'react-tooltip'
+import './UserProfile.css';
 
 function UserProfile({ userData }) {
     const {
@@ -18,12 +20,7 @@ function UserProfile({ userData }) {
         error
     } = userData;
 
-    const recentPhotos = [
-        'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp',
-        'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(107).webp',
-        'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(108).webp',
-        'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(114).webp',
-    ];
+    console.log(userData);
 
     dayjs.extend(relativeTime);
 
@@ -45,7 +42,7 @@ function UserProfile({ userData }) {
                                         style={{ width: '150px', zIndex: '1' }}
                                     />
                                     <button type="button" className="btn btn-outline-dark" data-mdb-ripple-color="dark" style={{ zIndex: '1' }}>
-                                        Edit profile
+                                        edit picture
                                     </button>
                                 </div>
                                 <div className="ms-3" style={{ marginTop: '130px' }}>
@@ -73,27 +70,32 @@ function UserProfile({ userData }) {
                                     <p className="lead fw-normal mb-1">About</p>
                                     <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
                                         <p className="font-italic mb-1">
-                                            Created { dayjs(dateCreated).fromNow() }
+                                            { userData.jwtToken.email } 
                                         </p>
-                                        {/* {about.map((item, index) => (
-                                            <p className="font-italic mb-1" key={index}>
-                                                {item}
-                                            </p>
-                                        ))} */}
+                                        <p className="font-italic mb-1">
+                                            Account created { dayjs(dateCreated).fromNow() }
+                                        </p>
+                                        
+                                        
                                     </div>
                                 </div>
                                 <div className="d-flex justify-content-between align-items-center mb-4">
                                     <p className="lead fw-normal mb-0">Badges Found</p>
-                                    <p className="mb-0">
-                                        <a href="#!" className="text-muted">
-                                            Show all
-                                        </a>
+                                    <p className="mb-0 text-muted">
+                                        Hover over a badge for more info
                                     </p>
                                 </div>
-                                <div className="row g-2">
-                                    {recentPhotos.map((photo, index) => (
-                                        <div className="col mb-2" key={index}>
-                                            <img src={photo} alt={`image ${index + 1}`} className="w-100 rounded-3" />
+                                <div className="row g-2" id="img-wrapper" style={{ backgroundColor: '#f8f9fa' }}>
+                                    { (badgesCollected.length == 0) ? <p>Wow much empty, go find some badges</p> : badgesCollected.map((badge, index) => (
+                                        <div className="col mb-2" key={index} data-tooltip-id="my-tooltip" data-tooltip-float="true" data-tooltip-html={"<h4>" + badge.title + "</h4><em>" + badge.description + "</em><br /><br />" + "Collected " + dayjs(badge.dateObtained).fromNow() + "<br />" + "Location found: " + badge.location + "<br />" + "Number " +  badge.uniqueNumber + " of " + badge.limit}>
+                                            <img src={badge.badgeImage} alt={`image ${index + 1}`} className="w-100 rounded-3" />
+                                            <Tooltip id="my-tooltip" />
+                                        </div>
+                                    ))}
+                                    { (badgesCollected.length == 0) ? <p>Wow much empty, go find some badges</p> : badgesCollected.map((badge, index) => (
+                                        <div className="col mb-2" key={index} data-tooltip-id="my-tooltip" data-tooltip-float="true" data-tooltip-html={"<h4>" + badge.title + "</h4><em>" + badge.description + "</em><br /><br />" + "Collected " + dayjs(badge.dateObtained).fromNow() + "<br />" + "Location found: " + badge.location + "<br />" + "Number " +  badge.uniqueNumber + " of " + badge.limit}>
+                                            <img src={badge.badgeImage} alt={`image ${index + 1}`} className="w-100 rounded-3" />
+                                            <Tooltip id="my-tooltip" />
                                         </div>
                                     ))}
                                 </div>

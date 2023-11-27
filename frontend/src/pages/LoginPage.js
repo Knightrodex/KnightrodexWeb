@@ -1,7 +1,4 @@
-// hello future Ethan or Caden, can you implement something to display that someone
-// tried to login with invalid credentials, an error message or something that
-// displays under the form after you try to login and fail.
-// Thanks    - Caden from the past
+// we really need to add email verification!
 
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -31,10 +28,12 @@ function Login() {
     const [loginUsername, setLoginUsername] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [error, setError] = useState('');
+    const [errFlag, setErrFlag] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrFlag(false);
 
         // hash password
         var hash = md5(loginPassword);
@@ -58,7 +57,22 @@ function Login() {
 
                 navigate('/HomePage');
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.log(err);
+                findErrorMsg(err.message);
+                setErrFlag(true);
+            });
+        
+
+    }
+
+    const findErrorMsg = (msg) => {
+        if (msg == "Request failed with status code 500")
+            setError("Email needs to be verified, click this link (not here yet lol)");
+        else if (msg == "Request failed with status code 400")
+            setError("Invalid email or password");
+        else
+            setError("ERROR");
     }
 
     // ------------------------------------------------------ preserving this bad boi
@@ -151,6 +165,7 @@ function Login() {
                                 <div className="mb-4">
                                     <button className="btn btn-info btn-lg btn-block" type="submit">Login</button>
                                 </div>
+                                { (errFlag) ? <p>{error}</p> : <p></p>}
                                 <p className="small mb-5 pb-lg-2"><a className="text-muted" href={buildPath('/HomePage')}>Forgot password?</a></p>
                                 <p>Don't have an account? <a href={buildPath('/SignUp')} className="link-info">Register here</a></p>
                             </form>

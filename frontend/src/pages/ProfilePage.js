@@ -27,18 +27,23 @@ function ProfilePage() {
         })
         .then((response) => {
             setIsLoading(false);
-            setUserInfo(response.data);
+
             localStorage.setItem("token", response.data.jwtToken);   
+
+            response.data.jwtToken = jwtDecode(response.data.jwtToken);
+            setUserInfo(response.data);
+            
         })
         .catch(err => {
             console.log(err);
         });
     }
 
+    // the loading text doesnt display (i think because it's not styled so it's covered by the nav bar)
     return (
         <>
             <Navbar />
-            { (isLoading) ? <p>Loading...</p> : <UserProfile userData={userInfo} />}
+            { (isLoading) ? <p>Loading...</p> : <UserProfile userData={userInfo} />} 
         </>
     );
 }
