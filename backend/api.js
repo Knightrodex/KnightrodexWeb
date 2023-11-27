@@ -42,7 +42,7 @@ exports.setApp = function( app, client )
     const generateUserIdLink = (uId) => 
     {
       // gonna have to change the link when we deploy
-      return "localhost:3000/VerifyUserPage/?userId=" + uId;
+      return "https://knightrodex-49dcc2a6c1ae.herokuapp.com/VerifyUserPage/?userId=" + uId;
     }
 
     // Use email verification with SendGrid API
@@ -52,8 +52,7 @@ exports.setApp = function( app, client )
         to: email, // Change to your recipient
         from: 'knightrodex@outlook.com', // Change to your verified sender
         subject: 'Knightrodex Verify Email',
-        // text: 'Click to verify email: ${generateUserIdLink(userId)}'
-        text: generateUserIdLink(userId)
+        text: 'Click to verify email: ${generateUserIdLink(userId)}'
       }
 
       sgMail
