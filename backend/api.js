@@ -5,6 +5,8 @@ const token = require('../createJWT');
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SG_API_KEY);
 
+const defaultPFP = "https://res.cloudinary.com/knightrodex/image/upload/v1701042095/knightrodex_users/defaultPicture.png"
+
 // Status Codes:
 // 200: Ok
 // 400: ID is not a valid ObjectId
@@ -145,7 +147,7 @@ exports.setApp = function( app, client )
         let response = { userId:'', firstName:'', lastName:'', email:'', error:'' };
 
         const newUser = { password:password, email:email, badgesObtained:[], 
-                          firstName:firstName, lastName:lastName, profilePicture:'', 
+                          firstName:firstName, lastName:lastName, profilePicture:defaultPFP, 
                           usersFollowed:[], dateCreated:(new Date()), resetCode:0, isVerified:false };
 
         try
@@ -157,6 +159,7 @@ exports.setApp = function( app, client )
           {
             response.error = 'User with the given email already exists';
             res.status(404).json(response);
+            return;
           }
 
           // Insert new user into the database
