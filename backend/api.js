@@ -53,7 +53,7 @@ exports.setApp = function( app, client )
         from: 'knightrodex@outlook.com', // Change to your verified sender
         subject: 'Knightrodex Verify Email',
         // text: 'Click to verify email: ${generateUserIdLink(userId)}'
-        text: 'Click this link to verify email'
+        text: generateUserIdLink(userId)
       }
 
       sgMail
