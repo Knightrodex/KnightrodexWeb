@@ -9,6 +9,7 @@ import { UserContext } from './UserContext';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import RouteGuard from './components/RouteGuard';
 import { setAuthToken } from './components/setAuthToken';
+import VerifyUserPage from './pages/VerifyUserPage';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -32,6 +33,7 @@ function App() {
             <Route path="/ProfilePage" element={<ProfilePage />} />
           </Route>
           <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
+          <Route path="/VerifyUserPage" element={<VerifyUserPage />} />
         </Routes>
       </BrowserRouter>
     </UserContext.Provider>

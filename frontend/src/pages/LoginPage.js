@@ -13,6 +13,9 @@ import ForgotPasswordBox from '../components/ForgotPasswordBox';
 import axios from 'axios';
 import { setAuthToken } from '../components/setAuthToken';
 const md5 = require("blueimp-md5");
+//import { jwtDecode } from 'jwt-decode';
+ //const jwt = require("jsonwebtoken");
+
 
 
 function Login() {
@@ -34,6 +37,8 @@ function Login() {
     const [error, setError] = useState('');
     const { user, setUser } = useContext(UserContext);
     const navigate = useNavigate();
+ 
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -50,7 +55,15 @@ function Login() {
         axios.post("https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/login", loginData)
             .then(response => {
                 // get token from response
+
                 const token = response.data.jwtToken;
+                //const decodedToken = jwtDecode(localStorage.token);
+
+                // store user ID in local
+                // localStorage.setItem("userID", decodedToken.userID);
+                console.log("IM WORKING");
+                //console.log("Decoded Token:", decodedToken);
+
 
                 // store JWT in local
                 localStorage.setItem("token", token);
