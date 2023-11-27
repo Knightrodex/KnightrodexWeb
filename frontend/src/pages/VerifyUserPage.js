@@ -1,18 +1,24 @@
-import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
  
 
 
 function VerifyUserPage() {
   // Extract userId from URL using useParams
-  const { userId } = useParams();
+  const [ queryParameters ] = useSearchParams();
+  const [ userId, setUserId ] = useState("");
+  const [ isLoading , setIsLoading ] = useState(true);
   const navigate = useNavigate();
 
-  console.log("userId-- " + userId); //isdgbfibsdjkbfksbksdbjksdbkbdkj------------------------
+  
 
   useEffect(() => {
+
+    setIsLoading(true);
+    setUserId(queryParameters.get("userId"));
+ 
     // Make API request to verify user
-    fetch('/api/verifyuser', {
+    fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/verifyuser', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -26,11 +32,13 @@ function VerifyUserPage() {
           console.error('Error verifying user:', data.error);
           // Handle error in UI if needed
         } else {
+          setIsLoading(false);
           console.log('User verified successfully:', data);
-        
-          // Update your UI or perform any other actions on successful verification
-          navigate('/HomePage');
 
+          // wait 1.5 seconds before redirecting
+          setTimeout(() => {
+            navigate('/');
+          }, 2000);
         }
       })
       .catch((error) => {
@@ -41,7 +49,7 @@ function VerifyUserPage() {
 
   return (
     <div className="text-center" style={{ marginTop: '50vh', transform: 'translateY(-50%)' }}>
-      <h2>Verifying Email....</h2>
+      {(isLoading) ? <h2>Verifying Email ...</h2> : <h2>Email verified, redirecting ...</h2>}
     </div>
   );
 }
