@@ -5,8 +5,6 @@ const token = require('../createJWT');
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SG_API_KEY);
 
-const defaultPFP = "https://res.cloudinary.com/knightrodex/image/upload/v1701042095/knightrodex_users/defaultPicture.png"
-
 // Status Codes:
 // 200: Ok
 // 400: ID is not a valid ObjectId
@@ -138,6 +136,8 @@ exports.setApp = function (app, client) {
     const { firstName, lastName, email, password } = req.body;
 
     let response = { userId: '', firstName: '', lastName: '', email: '', error: '' };
+
+    const defaultPFP = "https://res.cloudinary.com/knightrodex/image/upload/v1701042095/knightrodex_users/defaultPicture.png"
 
     const newUser = {
       password: password, email: email, badgesObtained: [],
