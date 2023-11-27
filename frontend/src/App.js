@@ -2,9 +2,9 @@ import { React, useState } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from './pages/LoginPage';
-import SignUpPage from './pages/SignUpPage'; 
+import SignUpPage from './pages/SignUpPage';
 import HomePage from './pages/HomePage';
-import ProfilePage from './pages/ProfilePage'; 
+import ProfilePage from './pages/ProfilePage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import RouteGuard from './components/RouteGuard';
 import { setAuthToken } from './components/setAuthToken';
@@ -15,42 +15,27 @@ function App() {
   // check jwt token
   const token = localStorage.getItem("token");
   if (token) {
-      setAuthToken(token);
+    setAuthToken(token);
   }
 
   return (
-<<<<<<< HEAD
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/SignUp" element={<SignUpPage />} />
+
         <Route path="/HomePage" element={<RouteGuard />}>
           <Route path="/HomePage" element={<HomePage />} />
         </Route>
+
         <Route path="/ProfilePage" element={<RouteGuard />}>
           <Route path="/ProfilePage" element={<ProfilePage />} />
         </Route>
+
         <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
+        <Route path="/VerifyUserPage" element={<VerifyUserPage />} />
       </Routes>
     </BrowserRouter>
-=======
-    <UserContext.Provider value={{ user, setUser }}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/SignUp" element={<SignUpPage />} />
-          <Route path="/HomePage" element={<RouteGuard />}>
-            <Route path="/HomePage" element={<HomePage />} />
-          </Route>
-          <Route path="/ProfilePage" element={<RouteGuard />}>
-            <Route path="/ProfilePage" element={<ProfilePage />} />
-          </Route>
-          <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
-          <Route path="/VerifyUserPage" element={<VerifyUserPage />} />
-        </Routes>
-      </BrowserRouter>
-    </UserContext.Provider>
->>>>>>> 6559aaa8cbe836ca49112e905ee328a44e6a2e91
   );
 }
 export default App;

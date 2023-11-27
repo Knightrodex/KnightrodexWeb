@@ -39,14 +39,21 @@ exports.setApp = function( app, client )
       return true;
     }
 
+    const generateUserIdLink = (uId) => 
+    {
+      // gonna have to change the link when we deploy
+      return "localhost:3000/VerifyUserPage/?userId=" + uId;
+    }
+
     // Use email verification with SendGrid API
-    function verifyEmail(email, response, res)
+    function verifyEmail(email, response, res, userId)
     {
       const msg = {
         to: email, // Change to your recipient
         from: 'knightrodex@outlook.com', // Change to your verified sender
         subject: 'Knightrodex Verify Email',
-        text: 'Click this link to verify your email!'
+        // text: 'Click to verify email: ${generateUserIdLink(userId)}'
+        text: 'Click this link to verify email'
       }
 
       sgMail
@@ -164,7 +171,7 @@ exports.setApp = function( app, client )
 
           // Insert new user into the database
           const result = await userCollection.insertOne(newUser);
-          const emailStatus = verifyEmail(email, response, res);
+          const emailStatus = verifyEmail(email, response, res, result.insertedId);
 
           if (emailStatus == false)
           {

@@ -39,7 +39,7 @@ const SignUp = () => {
             setIsPending(false);
         }
 
-        if (!isPending) {           
+        if (!isPending) {
             // hash password
             var hash = md5(password1);
 
@@ -50,7 +50,7 @@ const SignUp = () => {
                 email: email,
                 password: hash
             };
-//buildPath('/api/signup')
+
             try {
                 const response = await fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/signup', {
                     method: 'POST',
