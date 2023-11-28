@@ -17,15 +17,18 @@ sgMail.setApiKey(process.env.SG_API_KEY);
 // 500: User is already not following other user
 // 500: Internal Server Error
 
-exports.setApp = function (app, client) {
+exports.setApp = function (app, client) 
+{
   const db = client.db('Knightrodex');
   const userCollection = db.collection('User');
   const badgeCollection = db.collection('Badge');
 
   // Check if a given id is a valid ObjectId
   // Sends Error 400: ID is not a valid ObjectId with whatever response given
-  function isValidId(id, response, res) {
-    if (!ObjectId.isValid(id)) {
+  function isValidId(id, response, res) 
+  {
+    if (!ObjectId.isValid(id)) 
+    {
       response.error = "ID is not a valid ObjectId";
       res.status(400).json(response);
       return false;
@@ -35,19 +38,22 @@ exports.setApp = function (app, client) {
   }
 
 
-  function buildPath(route) {
+  function buildPath(route) 
+  {
     const app_name = 'knightrodex-49dcc2a6c1ae';
 
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production') 
+    {
       return 'https://' + app_name + '.herokuapp.com' + route;
     }
-    else {
+    else 
+    {
       return 'http://localhost:3000' + route;
     }
   }
 
   // Use email verification with SendGrid API
-  function verifyEmail(email, response, res, userId) {
+  async function verifyEmail(email, response, res, userId) {
     const msg = {
       to: email, // Change to your recipient
       from: 'knightrodex@outlook.com', // Change to your verified sender
@@ -55,7 +61,7 @@ exports.setApp = function (app, client) {
       text: `Click to verify email: ${buildPath("/VerifyUserPage/?userId=" + userId)}`
     }
 
-    sgMail
+    await sgMail
       .send(msg)
       .then(() => {
         console.log('Verification Email Sent!');
@@ -157,7 +163,7 @@ exports.setApp = function (app, client) {
 
       // Insert new user into the database
       const result = await userCollection.insertOne(newUser);
-      const emailStatus = verifyEmail(email, response, res, result.insertedId);
+      const emailStatus = await verifyEmail(email, response, res, result.insertedId);
 
       if (emailStatus == false) {
         res.status(500).json(response);
@@ -184,18 +190,23 @@ exports.setApp = function (app, client) {
     const { userId } = req.body;
     let response = { error: '' }
 
-    try {
-      if (!isValidId(userId, response, res)) {
+    try 
+    {
+      if (!isValidId(userId, response, res)) 
+      {
         return;
       }
 
       const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
-      if (user.isVerified) {
-        response.error('User is already verified.');
+      if (user.isVerified) 
+      {
+        response.error = 'User is already verified.';
         res.status(500).json(response);
+        return;
       }
-      else {
+      else 
+      {
         userCollection.updateOne(
           { _id: new ObjectId(userId) },
           { $set: { "isVerified": true } });
@@ -207,7 +218,7 @@ exports.setApp = function (app, client) {
       response.error = e.toString();
       res.status(500).json(response);
     }
-  })
+  });
 
   app.post('/api/passwordsend', async (req, res) => {
     // incoming email
