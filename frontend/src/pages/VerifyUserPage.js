@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
- 
+
 
 
 function VerifyUserPage() {
   // Extract userId from URL using useParams
-  const [ queryParameters ] = useSearchParams();
-  const [ userId, setUserId ] = useState("");
-  const [ isLoading , setIsLoading ] = useState(true);
+  const [queryParameters] = useSearchParams();
+  const [userId, setUserId] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  
+
 
   useEffect(() => {
 
     setIsLoading(true);
     setUserId(queryParameters.get("userId"));
- 
+
     // Make API request to verify user
     fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/verifyuser', {
       method: 'POST',
