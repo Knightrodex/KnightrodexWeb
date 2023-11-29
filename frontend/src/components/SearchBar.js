@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './SearchBar.css';
 import axios from 'axios';
+import { setAuthToken } from '../components/setAuthToken';
 
 
 
@@ -21,6 +22,7 @@ const SearchBar = ({ }) => {
             });
 
             localStorage.setItem("token", response.jwtToken);
+            setAuthToken(localStorage.token);
 
             // Assuming the API response has a field named 'result' containing the list of users
             setFilteredUsers(response.data.result);

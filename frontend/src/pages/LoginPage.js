@@ -88,14 +88,13 @@ function Login() {
                 <div className="container-fluid h-100">
                     <div className="row h-100">
                         <div className="col-sm-6 text-black d-flex flex-column justify-content-center align-items-center">
-
+                            <div className="mb-4">
+                                <i className="fas fa-crow fa-2x me-3" style={{ color: '#709085' }}></i>
+                                <span className="h1 fw-bold mb-0">Knightrodex</span>
+                            </div>
 
                             <form style={{ width: '23rem' }} onSubmit={handleSubmit}>
-                                <div className="mb-8">
-                                    <i className="fas fa-crow fa-2x me-3" style={{ color: '#709085' }}></i>
-                                    <span className="h1 fw-bold mb-0">Knightrodex</span>
-                                </div>
-                                <h3 className="fw-normal mb-3 pb-3" style={{ letterSpacing: '1px' }}>Log in</h3>
+
                                 <div className="mb-4">
                                     <label className="form-label" htmlFor="form2Example18">Email address</label>
                                     <input
@@ -118,14 +117,14 @@ function Login() {
                                         onChange={(e) => setLoginPassword(e.target.value)}
                                     />
                                 </div>
-                                { (errFlag) ? <p>{error}</p> : <p></p>}
+                                {(errFlag) ? <p>{error}</p> : <p></p>}
                                 <div className="mb-4">
                                     <button className="btn btn-lg btn-primary btn-block" type="submit">Login</button>
                                 </div>
                                 {(errFlag) ? <p>{error}</p> : <p></p>}
-                                <p className="small mb-5 pb-lg-2"><a className="text-muted" href={buildPath('/ResetPasswordPage')}>Forgot password?</a></p>
+                                <p className="small mb-5 pb-lg-2 text-center"><a className="text-muted" href={buildPath('/ResetPasswordPage')}>Forgot password?</a></p>
                                 <p className="small mb-5 pb-lg-2"><a className="text-muted" href={buildPath('/HomePage')}>Forgot password?</a></p>
-                                <p>Don't have an account? <a href={buildPath('/SignUp')} className="link-info">Register here</a></p>
+                                <p className= "text-center">Don't have an account? <a href={buildPath('/SignUp')} className="link-info">Register here</a></p>
                             </form>
                         </div>
                         <div className="col-sm-6 px-0 d-none d-sm-block" style={{ maxHeight: '100vh', overflow: 'hidden' }}>

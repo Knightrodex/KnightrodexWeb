@@ -6,26 +6,29 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import './ForgotPassword.css';
 
 
-function ResetCodeBox() {
-    const [email, setEmail] = useState('');
+function ResetCodeBox({ onSuccess }) {
+    const [resetCode, setResetCode] = useState('');
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
 
-    const handleEmailChange = (e) => {
-        setEmail(e.target.value);
+    const handleResetCodeChange = (e) => {
+        setResetCode(e.target.value);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        
-         try {
-            const response = await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/passwordsend', { email: email });
+        const userEmail = localStorage.getItem("inputtedEmail");
+        try {
+            const response = await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/passwordupdate', { email: userEmail, userReset: resetCode, newPassword: "etmpy" });
             console.log(response);
             if (response.status === 200) {
-                console.log('Reset code sent successfully!');
+                console.log('Accepted reset code!');
+                localStorage.setItem("inputtedResetCode", resetCode);
+
                 setSuccess(true);
                 setError(null);
+                onSuccess(); // triggers the UI to update
             } else {
                 console.error('Error sending reset code:', response.data.error);
                 setSuccess(false);
@@ -34,7 +37,7 @@ function ResetCodeBox() {
         } catch (error) {
             console.error('Error sending reset code:', error.message);
             setSuccess(false);
-            setError('Invalid Email. Please try again.');
+            setError('Invalid code. Please try again.');
         }
     };
 
@@ -48,15 +51,15 @@ function ResetCodeBox() {
                             <div className="panel-body">
                                 <div className="text-center">
                                     <h3><i className="fa fa-lock fa-4x"></i></h3>
-                                    <h2 className="text-center">Forgot Password?</h2>
-                                    <p>Please enter your email and type in your reset code.</p>
+                                    <h2 className="text-center">Reset Code Sent!</h2>
+                                    <p>Please enter your reset code.</p>
                                     <div className="panel-body">
                                         <form
                                             id="register-form"
                                             role="form"
                                             autoComplete="off"
                                             className="form"
-                                            method="post"
+                                            onSubmit={handleSubmit}
                                         >
                                             <div className="custom-form-group">
                                                 <div className="input-group">
@@ -66,11 +69,10 @@ function ResetCodeBox() {
                                                     <input
                                                         id="email"
                                                         name="email"
-                                                        placeholder="Email Address"
+                                                        placeholder="Reset Code"
                                                         className="form-control"
-                                                        type="email"
-                                                        value={email} // Add this line to bind the input value to the state
-                                                        onChange={handleEmailChange} // Add this line to handle email changes
+                                                        value={resetCode} // Add this line to bind the input value to the state
+                                                        onChange={handleResetCodeChange} // Add this line to handle email changes
                                                     />
                                                 </div>
                                             </div>
@@ -78,7 +80,7 @@ function ResetCodeBox() {
                                                 <input
                                                     name="recover-submit"
                                                     className="btn btn-lg btn-primary btn-block"
-                                                    value="Receive Reset Code"
+                                                    value="Verify Reset Code"
                                                     type="submit"
                                                 />
                                             </div>

@@ -6,10 +6,10 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import './ForgotPassword.css';
 
 
-function ForgotPasswordBox() {
+function ForgotPasswordBox({ onSuccess }) {
     const [email, setEmail] = useState('');
     const [error, setError] = useState(null);
- 
+
     const handleEmailChange = (e) => {
         setEmail(e.target.value);
     };
@@ -21,14 +21,16 @@ function ForgotPasswordBox() {
             console.log(response);
             if (response.status === 200) {
                 console.log('Reset code sent successfully!');
-                 setError(null);
+                localStorage.setItem("inputtedEmail", email);
+                setError(null);
+                onSuccess(); // triggers the UI to update
             } else {
                 console.error('Error sending reset code:', response.data.error);
-                 setError(response.data.error || 'Unknown error');
+                setError(response.data.error || 'Unknown error');
             }
         } catch (error) {
             console.error('Error sending reset code:', error.message);
-             setError('Invalid Email. Please try again.');
+            setError('Invalid Email. Please try again.');
         }
     };
 
@@ -78,7 +80,7 @@ function ForgotPasswordBox() {
                                             </div>
                                         </form>
                                         {error && <p className="small-gap error-text">{error}</p>}
-                                     </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

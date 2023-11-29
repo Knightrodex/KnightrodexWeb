@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 //import 'bootstrap/dist/css/bootstrap.css';
 import './Activities.css';
 
-function Activities() {
+function Activities({ userActivity }) {
+    // const {
+    //     activity,
+    //     jwtToken,
+    //     error
+    // } = userActivity;
+
     const activityData = [
         {
             avatar: "https://bootdey.com/img/Content/avatar/avatar6.png",
@@ -78,6 +84,10 @@ function Activities() {
         },
 
     ];
+
+    // useEffect(() => {
+    //     console.log("++++", userActivity);
+    // }, []);
 
     return (
          <div className="container bootstrap snippets bootdeys custom-body">
