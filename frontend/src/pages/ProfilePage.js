@@ -6,6 +6,7 @@ import UserProfile from "../components/UserProfile";
 import Navbar from "../components/Navbar";
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
+import { setAuthToken } from '../components/setAuthToken';
 
 function ProfilePage() {    
     const [userInfo, setUserInfo] = useState();
@@ -29,6 +30,7 @@ function ProfilePage() {
             setIsLoading(false);
 
             localStorage.setItem("token", response.data.jwtToken);   
+            setAuthToken(localStorage.token);
 
             response.data.jwtToken = jwtDecode(response.data.jwtToken);
             setUserInfo(response.data);
