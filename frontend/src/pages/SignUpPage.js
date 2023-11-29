@@ -258,13 +258,13 @@ const SignUp = () => {
                                         </div>
                                         <br />
                                         <br />
-                                        {!isPending && <button className="btn btn-info btn-lg btn-block" type='submit'>Create Account</button>}
+                                        {!isPending && <button className="btn btn-lg btn-primary btn-block" type='submit'>Create Account</button>}
                                         {isPending && <button disabled className="btn btn-info btn-lg btn-block">Adding Account...</button>}
                                     </form>
                                     <div>
                                         <br />
                                         <br />
-                                        <p>Already have an account? <a href={buildPath('/')} className="link-info">Login Here</a></p>
+                                        <p className="text-center">Already have an account? <a href={buildPath('/')} className="link-info">Login Here</a></p>
                                     </div>
                                 </div>
                             ) : (
