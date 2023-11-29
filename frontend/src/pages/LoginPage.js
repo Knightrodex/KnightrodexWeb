@@ -9,9 +9,6 @@ import ForgotPasswordBox from '../components/ForgotPasswordBox';
 import axios from 'axios';
 import { setAuthToken } from '../components/setAuthToken';
 const md5 = require("blueimp-md5");
-//import { jwtDecode } from 'jwt-decode';
- //const jwt = require("jsonwebtoken");
-
 
 
 function Login() {
@@ -52,15 +49,7 @@ function Login() {
         axios.post("https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/login", loginData)
             .then(response => {
                 // get token from response
-
                 const token = response.data.jwtToken;
-                //const decodedToken = jwtDecode(localStorage.token);
-
-                // store user ID in local
-                // localStorage.setItem("userID", decodedToken.userID);
-                console.log("IM WORKING");
-                //console.log("Decoded Token:", decodedToken);
-
 
                 // store JWT in local
                 localStorage.setItem("token", token);
@@ -87,56 +76,6 @@ function Login() {
         else
             setError("ERROR");
     }
-
-    // ------------------------------------------------------ preserving this bad boi
-    // const doLogin = async (e) => {
-    //     e.preventDefault();
-
-    //     // hash password
-    //     var hash = md5(loginPassword);
-
-    //     // Create an object with the login data
-    //     const loginData = {
-    //         email: loginUsername,
-    //         password: hash
-    //     };
-
-    //     try {
-    //         const response = await fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/login', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(loginData),
-    //         });
-
-    //         if (response.ok) {
-
-    //             const data = await response.json();
-    //             if (data.error) {
-    //                 setError(data.error);
-    //                 alert("Login Failed!");
-
-    //             } else {
-    //                 // Login successful, you can redirect or perform other actions
-    //                 setError('');
-    //                 setUser(data);
-
-    //                 alert('Login successful!'); // Display a success message or redirect here
-    //                 await navigate('/HomePage');
-    //             }
-    //         } else {
-
-    //             // Handle login failure here
-    //             setError('Invalid credentials');
-    //             alert('Login failed. Please check your credentials.');
-    //         }
-    //     } catch (error) {
-    //         console.error('Error:', error);
-    //         setError('An error occurred during login. Please try again later.');
-    //     }
-    // };
-
 
     return (
 
@@ -175,10 +114,10 @@ function Login() {
                                         onChange={(e) => setLoginPassword(e.target.value)}
                                     />
                                 </div>
+                                { (errFlag) ? <p>{error}</p> : <p></p>}
                                 <div className="mb-4">
                                     <button className="btn btn-info btn-lg btn-block" type="submit">Login</button>
                                 </div>
-                                { (errFlag) ? <p>{error}</p> : <p></p>}
                                 <p className="small mb-5 pb-lg-2"><a className="text-muted" href={buildPath('/HomePage')}>Forgot password?</a></p>
                                 <p>Don't have an account? <a href={buildPath('/SignUp')} className="link-info">Register here</a></p>
                             </form>

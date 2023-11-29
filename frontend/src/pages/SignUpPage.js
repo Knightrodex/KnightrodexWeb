@@ -1,16 +1,29 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const md5 = require("blueimp-md5");
 
 const SignUp = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
-    const [password1, setPassword1] = useState('');
-    const [password2, setPassword2] = useState('');
+    const [password, setPassword] = useState('');
     const [isPending, setIsPending] = useState(false);
     const [isPasswordValid, setIsPasswordValid] = useState(true);
     const [isEmailValid, setIsEmailValid] = useState(true);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
+    const [vis, setVis] = useState("password")
+    
+    const app_name = 'knightrodex-49dcc2a6c1ae'
+    function buildPath(route) {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://' + app_name + '.herokuapp.com' + route;
+        }
+        else {
+            return 'http://localhost:3000' + route;
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,69 +38,74 @@ const SignUp = () => {
             }
         }
 
-        setIsPending(true);
-        setIsPasswordValid(true);
-        setIsEmailValid(true);
-
-        if (password1 !== password2) {
-            setIsPasswordValid(false);
-            setIsPending(false);
-        }
-
+        await setIsPending(true);
+        await setIsPasswordValid(true);
+        await setIsEmailValid(true);
+        
         if (checkEmail() == false) {
             setIsEmailValid(false);
             setIsPending(false);
+            return false;
         }
 
-        if (!isPending) {
-            // hash password
-            var hash = md5(password1);
+        if (password.length < 8) {
+            setIsPasswordValid(false);
+            setIsPending(false);
+            return false;
+        }
+        
+        if (!/[A-Z]+/.test(password)) {
+            setIsPasswordValid(false);
+            setIsPending(false);
+            return false;
+        }
+        
+        if (!/[a-z]+/.test(password)) {
+            setIsPasswordValid(false);
+            setIsPending(false);
+            return false;
+        }
+        
+        if (!/[0-9]+/.test(password)) {
+            setIsPasswordValid(false);
+            setIsPending(false);
+            return false;
+        }
+        
+        if (!/[^A-Za-z0-9]+/.test(password)) {
+            setIsPasswordValid(false);
+            setIsPending(false);
+            return false;
+        }
 
-            // Create an object with the registration data
-            const registrationData = {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: hash
-            };
+        // hash password
+        var hash = md5(password);
 
-            try {
-                const response = await fetch('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/signup', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(registrationData),
-                });
+        // Create an object with the registration data
+        const registrationData = {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: hash
+        };
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.error) {
-                        setError(data.error);
-                    } else {
-                        // Registration successful
-                        setError('');
-                        // You can set a success message if needed
-                        // setSuccessMessage('Registration successful!');
-                        // Clear form fields
-                        setFirstName('');
-                        setLastName('');
-                        setEmail('');
-                        setPassword1('');
-                        window.location.href = buildPath('/');
+        axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/signup', registrationData)
+            .then(response => {
+                // Registration successful
+                setError('');
+                
+                // Clear form fields
+                setFirstName('');
+                setLastName('');
+                setEmail('');
+                setPassword('');
 
-                    }
-                } else {
-                    // Handle registration failure here
-                    setError('Registration failed. Please check your registration data.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
+                navigate('/');
+            })
+            .catch(err => {
+                console.error('Error:', err);
                 setError('An error occurred during registration. Please try again later.');
-            }
-
-
-        }
+            });
     }
 
     const checkEmail = () => {
@@ -98,61 +116,111 @@ const SignUp = () => {
 
         return false;
     }
+    
+    const toggleVis = () => {
+        if (vis === "password") {
+            setVis("text");
+            return;
+        }
+
+        setVis("password");
+        return;
+    }
 
     return (
-        <div className="signUp">
-            <h1>This is where you will sign up</h1>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>First Name: </label>
-                    <input
-                        type="text"
-                        required
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                    />
+        <div className="h-50 d-flex align-items-center justify-content-center" >
+            <div className='card'>
+                <div className='card-header' style={{ backgroundColor: '#f8f9fa' }}><h1>Sign Up</h1></div>
+                <div className='card-body'>
+                    <form style={{ width: '23rem' }} onSubmit={handleSubmit}>
+                        <div>
+                            <br />
+                            <label>First Name: </label>
+                            <br />
+                            <input
+                                id='fName'
+                                type="text"
+                                required
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                className="form-control form-control-lg"
+                            />
+                        </div>
+                        <div>
+                            <label>Last Name: </label>
+                            <br />
+                            <input
+                                id='lName'
+                                type="text"
+                                required
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                className="form-control form-control-lg"
+                            />
+                        </div>
+                        <div>
+                            <label>Email: </label>
+                            <br />
+                            {(isEmailValid) ? 
+                                <input
+                                    name='email'
+                                    type="text"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="form-control form-control-lg"
+                                />
+                            :
+                                <input
+                                    name='email'
+                                    type="text"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="form-control form-control-lg border-danger border-3"
+                                />
+                            }
+                            {!isEmailValid && <p>*Must enter a valid email address</p>}
+                        </div>
+                        <div>
+                            <label>Password: </label>
+                            <br />
+                            {(isPasswordValid) ?
+                                <input
+                                    id="pInput1"
+                                    name='password'
+                                    type={vis}
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="form-control form-control-lg"
+                                />
+                            :
+                                <input
+                                    id="pInput2"
+                                    name='password'
+                                    type={vis}
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="form-control form-control-lg border-danger border-3"
+                                />
+                                
+                            }
+                            <p><input type="checkbox" onClick={() => toggleVis()} /> Toggle Visibility</p>
+                            {!isPasswordValid && <p>*Password requirements: At least 8 characters, one uppercase, one lowercase, one number, one special character</p>}                  
+                        </div>
+                        <br />
+                        <br />
+                        {!isPending && <button className="btn btn-info btn-lg btn-block" type='submit'>Create Account</button>}
+                        {isPending && <button disabled className="btn btn-info btn-lg btn-block">Adding Account...</button>}
+                    </form>
+                    <br />
+                    <br />
+                    <p>Already have an account? <a href={buildPath('/')} className="link-info">Login Here</a></p>
                 </div>
-                <div>
-                    <label>Last Name: </label>
-                    <input
-                        type="text"
-                        required
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>Email: </label>
-                    <input
-                        type="text"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    {!isEmailValid && <p>Must enter a valid email address</p>}
-                </div>
-                <div>
-                    <label>Password: </label>
-                    <input
-                        type="text"
-                        required
-                        value={password1}
-                        onChange={(e) => setPassword1(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>Confirm password: </label>
-                    <input
-                        type="text"
-                        required
-                        value={password2}
-                        onChange={(e) => setPassword2(e.target.value)}
-                    />
-                    {!isPasswordValid && <p>Passwords must match</p>}
-                </div>
-                {!isPending && <button>Create Account</button>}
-                {isPending && <button disabled>Adding Account...</button>}
-            </form>
+            </div>
+            
         </div>
     );
 }
