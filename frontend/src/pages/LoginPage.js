@@ -8,10 +8,12 @@ import { useNavigate } from 'react-router-dom';
 import ForgotPasswordBox from '../components/ForgotPasswordBox';
 import axios from 'axios';
 import { setAuthToken } from '../components/setAuthToken';
+import '../components/Login.css';
+
 
 const md5 = require("blueimp-md5");
 //import { jwtDecode } from 'jwt-decode';
- //const jwt = require("jsonwebtoken");
+//const jwt = require("jsonwebtoken");
 
 
 
@@ -34,7 +36,7 @@ function Login() {
     const [error, setError] = useState('');
     const [errFlag, setErrFlag] = useState(false);
     const navigate = useNavigate();
- 
+
 
 
     const handleSubmit = async (e) => {
@@ -55,13 +57,6 @@ function Login() {
                 // get token from response
 
                 const token = response.data.jwtToken;
-                //const decodedToken = jwtDecode(localStorage.token);
-
-                // store user ID in local
-                // localStorage.setItem("userID", decodedToken.userID);
-                console.log("IM WORKING");
-                //console.log("Decoded Token:", decodedToken);
-
 
                 // store JWT in local
                 localStorage.setItem("token", token);
@@ -76,7 +71,7 @@ function Login() {
                 findErrorMsg(err.message);
                 setErrFlag(true);
             });
-        
+
 
     }
 
@@ -147,12 +142,13 @@ function Login() {
                 <div className="container-fluid h-100">
                     <div className="row h-100">
                         <div className="col-sm-6 text-black d-flex flex-column justify-content-center align-items-center">
-                            <div className="px-5 ms-xl-4 text-center">
-                                <i className="fas fa-crow fa-2x me-3" style={{ color: '#709085' }}></i>
-                                <span className="h1 fw-bold mb-0">Knightrodex</span>
-                            </div>
- 
+
+
                             <form style={{ width: '23rem' }} onSubmit={handleSubmit}>
+                                <div className="mb-8">
+                                    <i className="fas fa-crow fa-2x me-3" style={{ color: '#709085' }}></i>
+                                    <span className="h1 fw-bold mb-0">Knightrodex</span>
+                                </div>
                                 <h3 className="fw-normal mb-3 pb-3" style={{ letterSpacing: '1px' }}>Log in</h3>
                                 <div className="mb-4">
                                     <label className="form-label" htmlFor="form2Example18">Email address</label>
@@ -177,10 +173,10 @@ function Login() {
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <button className="btn btn-info btn-lg btn-block" type="submit">Login</button>
+                                    <button className="btn btn-lg btn-primary btn-block" type="submit">Login</button>
                                 </div>
-                                { (errFlag) ? <p>{error}</p> : <p></p>}
-                                <p className="small mb-5 pb-lg-2"><a className="text-muted" href={buildPath('/HomePage')}>Forgot password?</a></p>
+                                {(errFlag) ? <p>{error}</p> : <p></p>}
+                                <p className="small mb-5 pb-lg-2"><a className="text-muted" href={buildPath('/ResetPasswordPage')}>Forgot password?</a></p>
                                 <p>Don't have an account? <a href={buildPath('/SignUp')} className="link-info">Register here</a></p>
                             </form>
                         </div>
