@@ -243,7 +243,7 @@ const SignUp = () => {
                                     :
                                         <input
                                             name="password"
-                                            type={vis}
+                                            type="password"
                                             required
                                             value={password2}
                                             onChange={(e) => setPassword2(e.target.value)}
