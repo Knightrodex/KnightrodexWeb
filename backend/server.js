@@ -22,14 +22,16 @@ let api = require('./api.js');
 const { builtinModules } = require('module');
 api.setApp(app, client);
 
-app.set('port', (process.env.PORT || 5000));
 // Use the login API
 // app.use('/api', loginRouter);
 
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ` + PORT);
-});
+if (process.env.NODE_ENV !== 'test')
+{
+  app.set('port', (process.env.PORT || 5000));
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ` + PORT);
+  });
+}
 
 // For Heroku deployment
 

@@ -425,7 +425,7 @@ exports.setApp = function (app, client)
       const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
       if (user == null) {
-        response.error = 'User ' + userId + ' Not Found';
+        response.error = 'User Not Found';
         res.status(404).json(response);
         return;
       }
@@ -447,7 +447,7 @@ exports.setApp = function (app, client)
 
         // Verify badge is in database
         if (badgeInfo == null) {
-          response.error = 'Badge ' + badgeId + ' Not Found';
+          response.error = 'Badge Not Found';
           res.status(404).json(response);
           return;
         }
@@ -649,12 +649,12 @@ exports.setApp = function (app, client)
 
       // Verify both users exist in database
       if (currentUser == null) {
-        response.error = 'User ' + currentUserId + ' Not Found';
+        response.error = 'User Not Found';
         res.status(404).json(response);
         return;
       }
       else if (otherUser == null) {
-        response.error = 'User ' + otherUserId + ' Not Found';
+        response.error = 'User Not Found';
         res.status(404).json(response);
         return;
       }
@@ -767,6 +767,17 @@ exports.setApp = function (app, client)
         return;
       }
 
+      // Iterate through the current user's badges and add data to the activity list
+      for (const badgeCollected of currUser.badgesObtained) {
+        const badgeInfo = await badgeCollection.findOne({ _id: new ObjectId(badgeCollected.badgeId) });
+        const activityInfo = {
+          email: currUser.email, firstName: currUser.firstName, lastName: currUser.lastName, profilePicture: currUser.profilePicture,
+          badgeId: badgeCollected.badgeId, badgeTitle: badgeInfo.title,
+          dateObtained: badgeCollected.dateObtained
+        };
+        response.activity.push(activityInfo);
+      };
+
       // Iterate through all followed users
       for (const followedUserId of currUser.usersFollowed) {
         if (!isValidId(followedUserId, response, res)) {
@@ -834,7 +845,7 @@ exports.setApp = function (app, client)
     }
 
     try {
-      userCollection.updateOne(
+      await userCollection.updateOne(
         { _id: new ObjectId(userId) },
         { $set: { 'profilePicture': profilePicture } }
       );
