@@ -6,7 +6,7 @@ import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
- import axios from 'axios';
+import axios from 'axios';
 import { setAuthToken } from '../components/setAuthToken';
 
 function HomePage() {
@@ -25,7 +25,7 @@ function HomePage() {
     // useEffect runs when the page loads
     useEffect(() => {
         getUserData();
-    }, [userInfo]);
+    }, []);
 
     const getUserData = async () => {
         setIsLoading(true);
@@ -37,15 +37,15 @@ function HomePage() {
             jwtToken: localStorage.token
         })
         .then((response) => {
-            setIsLoading(false);
-
             console.log(response);
 
-            localStorage.setItem("token", response.data.jwtToken);   
-            setAuthToken(localStorage.token);
+            // localStorage.setItem("token", response.data.jwtToken);   
+            // setAuthToken(localStorage.token);
 
             response.data.jwtToken = jwtDecode(response.data.jwtToken);
             setUserInfo(response.data);
+
+            setIsLoading(false);
         })
         .catch(err => {
             console.log("jknsdfknfgsdklsdnbklsedjbfkolsdjb");
@@ -57,7 +57,7 @@ function HomePage() {
         <>
             <Navbar />
             <SearchBar users />
-            <Activities userActivity={userInfo}/>
+            { (isLoading) ? <p>Loading...</p> : <Activities userActivity={userInfo}/>} 
         </>
     );
 }

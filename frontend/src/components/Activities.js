@@ -1,93 +1,25 @@
 import React, { useEffect, useState } from 'react';
 //import 'bootstrap/dist/css/bootstrap.css';
 import './Activities.css';
+import dayjs from 'dayjs';
+import relativeTime from "dayjs/plugin/relativeTime";
 
 function Activities({ userActivity }) {
-    // const {
-    //     activity,
-    //     jwtToken,
-    //     error
-    // } = userActivity;
+    const {
+        activity,
+        jwtToken,
+        error
+    } = userActivity;
 
-    const activityData = [
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar6.png",
-            title: "Alexander Herthic started following Katya Angintiew",
-            date: "Today 6:15 pm - 22.03 2015",
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar1.png",
-            title: "Katya Angintiew posted a new blog",
-            date: "Today 5:60 pm - 12.06.2016",
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar2.png",
-            title: "Alexander Herthic posted message on Monica Smith site",
-            date: "Today 2:10 pm - 12.06.2015",
-            content:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s. Over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
-        },
-        {
-            title: "Katya Angintiew add 1 photo on Monica Smith site",
-            date: "Today 5:60 pm - 12.06.2016",
-            photos: [
-                "https://www.bootdey.com/image/266x200/",
-                "https://www.bootdey.com/image/266x200/",
-                "https://www.bootdey.com/image/266x200/",
-            ],
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar4.png",
-            title: "Alexander Herthic posted message on Monica Smith site",
-            date: "Today 2:10 pm - 12.06.2015",
-            content:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s. Over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar1.png",
-            title: "Katya Angintiew posted a new blog",
-            date: "Today 5:60 pm - 12.06.2016",
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar2.png",
-            title: "Alexander Herthic started following Katya Angintiew",
-            date: "Today 6:15 pm - 22.03 2015",
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar3.png",
-            title: "Katya Angintiew posted a new blog",
-            date: "Today 5:60 pm - 12.06.2016",
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar4.png",
-            title: "Alexander Herthic posted message on Monica Smith site",
-            date: "Today 2:10 pm - 12.06.2015",
-            content:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s. Over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar1.png",
-            title: "Alexander Herthic posted message on Monica Smith site",
-            date: "Today 2:10 pm - 12.06.2015",
-            content:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s. Over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar4.png",
-            title: "Katya Angintiew posted a new blog",
-            date: "Today 5:60 pm - 12.06.2016",
-        },
-        {
-            avatar: "https://bootdey.com/img/Content/avatar/avatar5.png",
-            title: "Katya Angintiew posted a new blog",
-            date: "Today 5:60 pm - 12.06.2016",
-        },
+    dayjs.extend(relativeTime);
 
-    ];
-
-    // useEffect(() => {
-    //     console.log("++++", userActivity);
-    // }, []);
+    useEffect(() => {
+        console.log("++++", userActivity.activity);
+        userActivity.activity.map((act, index) => {
+            console.log(index);
+            console.log(act.profilePicture);
+        });
+    }, []);
 
     return (
          <div className="container bootstrap snippets bootdeys custom-body">
@@ -98,8 +30,33 @@ function Activities({ userActivity }) {
                     style={{ overflowY: "hidden", outline: "none" }}
                     tabIndex={5003}
                 >
-                    <h6>Activities</h6>
-                    {activityData.map((activity, index) => (
+                    <h4 class="text-center fw-bold">Recent Activities</h4>
+                    {userActivity.activity.map((act, index) => (
+                        <div className="unit" key={index}>
+                            {act.profilePicture && (
+                                <div className="avatar">
+                                    <img
+                                        src={act.profilePicture}
+                                        className="img-responsive"
+                                        alt="profile"
+                                    />
+                                </div>
+                            )}
+                            <div class="fw-bold" className="field title">
+                                {act.firstName + " " + act.lastName}
+                                <p class="fw-light">{act.email}</p>
+                            </div>
+                            <div className="field date">
+                                <span class="text-start" className="f-l"><p>Obtained the {act.badgeTitle} badge</p></span>
+                            </div>
+                            {act.dateObtained && (
+                                <div className="field date">
+                                    <span class="text-muted" >{dayjs(act.dateObtained).fromNow()}  -  {dayjs(act.dateObtained).format('MMM D, YYYY [at] h:mm A')}</span>  
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                    {/* {activityData.map((activity, index) => (
                         <div className="unit" key={index}>
                             {activity.avatar && (
                                 <a className="avatar" href="#">
@@ -156,7 +113,7 @@ function Activities({ userActivity }) {
                                 )}
                             </div>
                         </div>
-                    ))}
+                    ))} */}
                 </div>
             </div>
         </div>

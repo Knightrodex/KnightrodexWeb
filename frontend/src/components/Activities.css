@@ -28,17 +28,17 @@
 
 .activities .unit {
     border-bottom: 1px solid #d8d8d8;
-    padding: 20px 0 20px 50px;
+    padding: 20px 0 20px 60px;
     min-height: 80px;
     position: relative;
     overflow: hidden;
 }
 .activities .unit .avatar {
     display: block;
-    width: 40px;
-    height: 90px;
+    width: 50px;
+    height: 40px;
     position: absolute;
-    top: 20px;
+    top: 15px;
     left: 0;
 }
 .activities .unit .avatar img {
