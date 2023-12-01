@@ -123,7 +123,7 @@ function Login() {
                                 </div>
                                 {(errFlag) ? <p>{error}</p> : <p></p>}
                                 <p className="small mb-5 pb-lg-2 text-center"><a className="text-muted" href={buildPath('/ResetPasswordPage')}>Forgot password?</a></p>
-                                <p className="small mb-5 pb-lg-2"><a className="text-muted" href={buildPath('/HomePage')}>Forgot password?</a></p>
+                                {/* <p className="small mb-5 pb-lg-2"><a className="text-muted" href={buildPath('/HomePage')}>Forgot password?</a></p> */}
                                 <p className= "text-center">Don't have an account? <a href={buildPath('/SignUp')} className="link-info">Register here</a></p>
                             </form>
                         </div>
