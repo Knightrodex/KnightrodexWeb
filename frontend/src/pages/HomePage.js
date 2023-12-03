@@ -1,4 +1,4 @@
- import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar";
 import SearchBar from '../components/SearchBar';
 import Activities from "../components/Activities";
 import { jwtDecode } from 'jwt-decode'
@@ -36,28 +36,23 @@ function HomePage() {
             userId: jwt.userId,
             jwtToken: localStorage.token
         })
-        .then((response) => {
-            console.log(response);
+            .then((response) => {
 
-            // localStorage.setItem("token", response.data.jwtToken);   
-            // setAuthToken(localStorage.token);
+                setUserInfo(response.data);
 
-            response.data.jwtToken = jwtDecode(response.data.jwtToken);
-            setUserInfo(response.data);
-
-            setIsLoading(false);
-        })
-        .catch(err => {
-            console.log("jknsdfknfgsdklsdnbklsedjbfkolsdjb");
-            console.log(err);
-        });
-    }    
+                setIsLoading(false);
+            })
+            .catch(err => {
+                console.log("jknsdfknfgsdklsdnbklsedjbfkolsdjb");
+                console.log(err);
+            });
+    }
 
     return (
         <>
             <Navbar />
             <SearchBar users />
-            { (isLoading) ? <p>Loading...</p> : <Activities userActivity={userInfo}/>} 
+            {(isLoading) ? <p>Loading...</p> : <Activities userActivity={userInfo} />}
         </>
     );
 }

@@ -1,28 +1,27 @@
 import React, { useEffect, useState } from 'react';
-//import 'bootstrap/dist/css/bootstrap.css';
 import './Activities.css';
 import dayjs from 'dayjs';
 import relativeTime from "dayjs/plugin/relativeTime";
 
 function Activities({ userActivity }) {
-    const {
-        activity,
-        jwtToken,
-        error
-    } = userActivity;
+    // const {
+    //     activity,
+    //     jwtToken,
+    //     error
+    // } = userActivity;
 
     dayjs.extend(relativeTime);
 
     useEffect(() => {
-        console.log("++++", userActivity.activity);
+        //console.log("++++", userActivity.activity);
         userActivity.activity.map((act, index) => {
-            console.log(index);
-            console.log(act.profilePicture);
+            // console.log(index);
+            // console.log(act.profilePicture);
         });
     }, []);
 
     return (
-         <div className="container bootstrap snippets bootdeys custom-body">
+        <div className="container bootstrap snippets bootdeys custom-body">
             <div className="col-md-12 col-right">
                 <div
                     className="col-inside-lg decor-default activities"
@@ -30,7 +29,7 @@ function Activities({ userActivity }) {
                     style={{ overflowY: "hidden", outline: "none" }}
                     tabIndex={5003}
                 >
-                    <h4 class="text-center fw-bold">Recent Activities</h4>
+                    <h4 className="text-center fw-bold">Recent Activities</h4>
                     {userActivity.activity.map((act, index) => (
                         <div className="unit" key={index}>
                             {act.profilePicture && (
@@ -42,16 +41,16 @@ function Activities({ userActivity }) {
                                     />
                                 </div>
                             )}
-                            <div class="fw-bold" className="field title">
+                            <div className="field title fw-bold">
                                 {act.firstName + " " + act.lastName}
-                                <p class="fw-light">{act.email}</p>
+                                <p className="fw-light">{act.email}</p>
                             </div>
                             <div className="field date">
-                                <span class="text-start" className="f-l"><p>Obtained the {act.badgeTitle} badge</p></span>
+                                <span className=" text-start f-l"><p>Obtained the {act.badgeTitle} badge</p></span>
                             </div>
                             {act.dateObtained && (
                                 <div className="field date">
-                                    <span class="text-muted" >{dayjs(act.dateObtained).fromNow()}  -  {dayjs(act.dateObtained).format('MMM D, YYYY [at] h:mm A')}</span>  
+                                    <span className="text-muted" >{dayjs(act.dateObtained).fromNow()}  -  {dayjs(act.dateObtained).format('MMM D, YYYY [at] h:mm A')}</span>
                                 </div>
                             )}
                         </div>

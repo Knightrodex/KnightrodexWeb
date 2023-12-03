@@ -3,28 +3,41 @@ import './SearchBar.css';
 import axios from 'axios';
 import { setAuthToken } from '../components/setAuthToken';
 
+import { jwtDecode } from 'jwt-decode';
+
+
 
 
 const SearchBar = ({ }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredUsers, setFilteredUsers] = useState([]);
 
+    const user = [ // User this as an example reference of a single user in the filteredUsers array
+        {
+            email: "stevenagrady@gmail.com",
+            firstName: "Steven",
+            isFollowed: true,
+            lastName: "Grady",
+            profilePicture: "https://res.cloudinary.com/knightrodex/image/upload/v1700985162/knightrodex_users/6525c13e21cb5f9f2b270d87.jpg",
+            userId: "6525c13e21cb5f9f2b270d87"
+        },
+    ];
+
     const handleSearch = async (value) => {
         setSearchTerm(value);
 
         try {
 
+            const jwt = jwtDecode(localStorage.token);
+            console.log("JWTTTTTT  ", jwt);
 
-            const response = await axios.post('/api/searchemail', {
-                requesterUserId: 'your_requester_user_id',  // Replace with the actual requester user ID
+            const response = await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/searchemail', {
+                requesterUserId: jwt.userId,
                 partialEmail: value,
-                jwtToken: localStorage.getItem("token"),  // Replace with the actual JWT token
+                jwtToken: localStorage.token
             });
 
-            localStorage.setItem("token", response.jwtToken);
-            setAuthToken(localStorage.token);
-
-            // Assuming the API response has a field named 'result' containing the list of users
+            console.log("API RESPONSE: ", response.data);
             setFilteredUsers(response.data.result);
         } catch (error) {
             console.error('Error searching users:', error);
@@ -43,7 +56,7 @@ const SearchBar = ({ }) => {
             />
             <ul className="user-list">
                 {filteredUsers.map((user) => (
-                    <li key={user.id}>{user.name}</li>
+                    <li key={user.userId}>{user.firstName}</li>
                 ))}
             </ul>
         </div>

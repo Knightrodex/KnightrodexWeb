@@ -13,7 +13,7 @@ export const NavbarData = [
         cName: 'nav-text'
     },
     {
-        title: 'Leaderboards',
+        title: 'Friends',
         path: '/products',
         cName: 'nav-text'
     },

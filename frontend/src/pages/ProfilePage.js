@@ -29,9 +29,6 @@ function ProfilePage() {
         .then((response) => {
             setIsLoading(false);
 
-            // localStorage.setItem("token", response.data.jwtToken);   
-            // setAuthToken(localStorage.token);
-
             response.data.jwtToken = jwtDecode(response.data.jwtToken);
             setUserInfo(response.data);
             
