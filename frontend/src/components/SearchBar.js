@@ -23,6 +23,10 @@ const SearchBar = ({ }) => {
         },
     ];
 
+    const handleFollow = (userId) => {
+
+    }
+
     const handleSearch = async (value) => {
         setSearchTerm(value);
 
@@ -48,19 +52,46 @@ const SearchBar = ({ }) => {
     return (
         <div className="search-container">
             <input
-                type='text'
-                placeholder='Search users'
+                type="text"
+                placeholder="Search users"
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
-                className='search-input'
+                className="search-input"
             />
             <ul className="user-list">
                 {filteredUsers.map((user) => (
-                    <li key={user.userId}>{user.firstName}</li>
+                    <li key={user.userId} className="user-item unit">
+                        <div className="avatar">
+                            {user.profilePicture && (
+                                <img
+                                    src={user.profilePicture}
+                                    className="img-responsive"
+                                    alt="profile"
+                                />
+                            )}
+                        </div>
+                        <div className="user-details">
+                            <div className="field title fw-bold">
+                                {user.firstName} {user.lastName}
+                                <p className="fw-light">{user.email}</p>
+                            </div>
+                            <div className="follow-button">
+                                {/* Add your Follow button here */}
+                                <button onClick={() => handleFollow(user.userId)}>
+                                    Follow
+                                </button>
+                            </div>
+                            {/* Add additional fields as needed */}
+                        </div>
+
+                    </li>
                 ))}
             </ul>
         </div>
     );
+
+
+
 };
 
 export default SearchBar;
