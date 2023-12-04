@@ -58,6 +58,12 @@
     height: 50px !important;
 }
 
+.friend-list-container{
+    max-width: 600px; /* Adjust the value as needed */
+    margin: auto; /* Center the list horizontally */
+    margin-top: 20px
+}
+
 /* Field Styles */
 /* .friend-item .field {
     overflow: hidden;

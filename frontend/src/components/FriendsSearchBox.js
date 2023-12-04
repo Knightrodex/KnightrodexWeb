@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './FriendsSearchBox.css';
+import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 
 import { jwtDecode } from 'jwt-decode';
 
@@ -119,7 +120,27 @@ function FriendsSearchBox() {
                 />
             </div>
 
-            <div className="col-md-12 col-right">
+            <ul className="list-group list-group-light friend-list-container">
+                {filteredUsers.map((user) => (
+                    <li key={user.userId} className="list-group-item d-flex justify-content-between align-items-center">
+                        <div className="d-flex align-items-center">
+                            <img src={user.profilePicture} alt="" style={{ width: '45px', height: '45px' }} className="rounded-circle" />
+                            <div className="ms-3">
+                                <p className="fw-bold mb-1">{`${user.firstName} ${user.lastName}`}</p>
+                                <p className="text-muted mb-0">{user.email}</p>
+                            </div>
+                        </div>
+                        <button className= "btn btn-sm btn-primary  " onClick={() => handleFollow(user)}>
+                            {user.isFollowed ? "Unfollow" : "Follow"}
+                        </button>
+                    </li>
+                ))}
+            </ul>
+
+
+
+
+            {/* <div className="col-md-12 col-right">
                 <div
                     className="col-inside-lg decor-default activities"
                     id="friends"
@@ -149,7 +170,7 @@ function FriendsSearchBox() {
                         </div>
                     ))}
                 </div>
-            </div>
+            </div> */}
 
 
 
