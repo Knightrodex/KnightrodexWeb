@@ -9,6 +9,8 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import RouteGuard from './components/RouteGuard';
 import { setAuthToken } from './components/setAuthToken';
 import VerifyUserPage from './pages/VerifyUserPage';
+import FriendsPage from './pages/FriendsPage';
+
 
 function App() {
 
@@ -30,6 +32,10 @@ function App() {
 
         <Route path="/ProfilePage" element={<RouteGuard />}>
           <Route path="/ProfilePage" element={<ProfilePage />} />
+        </Route>
+
+        <Route path="/FriendsPage" element={<RouteGuard />}>
+          <Route path="/FriendsPage" element={<FriendsPage />} />
         </Route>
 
         <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />

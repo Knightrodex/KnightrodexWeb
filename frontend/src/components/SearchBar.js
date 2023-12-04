@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './SearchBar.css';
 import axios from 'axios';
-import { setAuthToken } from '../components/setAuthToken';
-
 import { jwtDecode } from 'jwt-decode';
 
 
