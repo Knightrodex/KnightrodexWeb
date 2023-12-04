@@ -12,6 +12,7 @@ const SearchBar = ({ }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredUsers, setFilteredUsers] = useState([]);
 
+
     const user = [ // User this as an example reference of a single user in the filteredUsers array
         {
             email: "stevenagrady@gmail.com",
@@ -23,7 +24,49 @@ const SearchBar = ({ }) => {
         },
     ];
 
-    const handleFollow = (userId) => {
+
+
+    const handleFollow = async (otherUser) => {
+        const jwt = jwtDecode(localStorage.token);
+
+        if (otherUser.isFollowed) {
+            await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/unfollowuser', {
+                currentUserId: jwt.userId,
+                otherUserId: otherUser.userId,
+                jwtToken: localStorage.token
+            })
+                .then((response) => {
+
+                    console.log("Unfollowed user successfully.");
+
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+        else {
+            await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/followUser', {
+                currentUserId: jwt.userId,
+                otherUserId: otherUser.userId,
+                jwtToken: localStorage.token
+            })
+                .then((response) => {
+
+                    console.log("Followed user Successfully.");
+
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+
+        setFilteredUsers((prevUsers) =>
+            prevUsers.map((user) =>
+                user.userId === otherUser.userId
+                    ? { ...user, isFollowed: !user.isFollowed }
+                    : user
+            )
+        );
 
     }
 
@@ -76,12 +119,10 @@ const SearchBar = ({ }) => {
                                 <p className="fw-light">{user.email}</p>
                             </div>
                             <div className="follow-button">
-                                {/* Add your Follow button here */}
-                                <button onClick={() => handleFollow(user.userId)}>
-                                    Follow
+                                <button onClick={() => handleFollow(user)}>
+                                    {user.isFollowed ? "Unfollow" : "Follow"}
                                 </button>
                             </div>
-                            {/* Add additional fields as needed */}
                         </div>
 
                     </li>

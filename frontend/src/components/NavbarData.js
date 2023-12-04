@@ -14,7 +14,7 @@ export const NavbarData = [
     },
     {
         title: 'Friends',
-        path: '/products',
+        path: '/FriendsPage',
         cName: 'nav-text'
     },
     {
