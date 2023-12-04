@@ -27,20 +27,37 @@ function FriendsSearchBox() {
     const handleFollow = async (otherUser) => {
         const jwt = jwtDecode(localStorage.token);
 
+
+
         if (otherUser.isFollowed) {
-            await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/unfollowuser', {
-                currentUserId: jwt.userId,
-                otherUserId: otherUser.userId,
-                jwtToken: localStorage.token
-            })
-                .then((response) => {
+            const confirmed = window.confirm(`Are you sure you want to ${otherUser.isFollowed ? 'unfollow' : 'follow'} ${otherUser.firstName} ${otherUser.lastName}?`);
 
-                    console.log("Unfollowed user successfully.");
-
+            if (confirmed) {
+                await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/unfollowuser', {
+                    currentUserId: jwt.userId,
+                    otherUserId: otherUser.userId,
+                    jwtToken: localStorage.token
                 })
-                .catch(err => {
-                    console.log(err);
-                });
+                    .then((response) => {
+
+                        console.log("Unfollowed user successfully.");
+
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+
+                setFilteredUsers((prevUsers) =>
+                    prevUsers.map((user) =>
+                        user.userId === otherUser.userId
+                            ? { ...user, isFollowed: !user.isFollowed }
+                            : user
+                    )
+                );
+            }
+
+
+
         }
         else {
             await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/followUser', {
@@ -56,20 +73,22 @@ function FriendsSearchBox() {
                 .catch(err => {
                     console.log(err);
                 });
+
+            setFilteredUsers((prevUsers) =>
+                prevUsers.map((user) =>
+                    user.userId === otherUser.userId
+                        ? { ...user, isFollowed: !user.isFollowed }
+                        : user
+                )
+            );
         }
 
-        setFilteredUsers((prevUsers) =>
-            prevUsers.map((user) =>
-                user.userId === otherUser.userId
-                    ? { ...user, isFollowed: !user.isFollowed }
-                    : user
-            )
-        );
+
 
     }
 
-     // useEffect runs when the page loads
-     useEffect(() => {
+    // useEffect runs when the page loads
+    useEffect(() => {
         getUserData();
     }, []);
 
@@ -122,7 +141,7 @@ function FriendsSearchBox() {
                                 <p className="text-muted mb-0">{user.email}</p>
                             </div>
                         </div>
-                        <button className= "btn btn-sm btn-primary  " onClick={() => handleFollow(user)}>
+                        <button className="btn btn-sm btn-primary  " onClick={() => handleFollow(user)}>
                             {user.isFollowed ? "Unfollow" : "Follow"}
                         </button>
                     </li>

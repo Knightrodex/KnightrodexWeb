@@ -51,7 +51,7 @@ function HomePage() {
     return (
         <>
             <Navbar />
-            <SearchBar users />
+            {/* <SearchBar users /> */}
             {(isLoading) ? <p>Loading...</p> : <Activities userActivity={userInfo} />}
         </>
     );
