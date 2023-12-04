@@ -68,6 +68,15 @@ function FriendsSearchBox() {
 
     }
 
+     // useEffect runs when the page loads
+     useEffect(() => {
+        getUserData();
+    }, []);
+
+    const getUserData = async () => {
+        handleSearch("");
+    }
+
     const handleSearch = async (value) => {
         setSearchTerm(value);
 
@@ -89,23 +98,6 @@ function FriendsSearchBox() {
         }
     };
 
-    const nearbyUsers = [
-        {
-            id: 1,
-            avatar: 'https://bootdey.com/img/Content/avatar/avatar7.png',
-            name: 'Sophia Page',
-            occupation: 'Software Engineer',
-            distance: '500m away',
-        },
-        {
-            id: 2,
-            avatar: 'https://bootdey.com/img/Content/avatar/avatar6.png',
-            name: 'Emma Johnson',
-            occupation: 'Model at Fashion',
-            distance: '800m away',
-        },
-        // Add more nearby users as needed
-    ];
 
     return (
         <>
