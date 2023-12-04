@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Tooltip } from 'react-tooltip'
 import './UserProfile.css';
+import UploadWidget from './UploadWidget';
 
 function UserProfile({ userData }) {
     const {
@@ -41,6 +42,7 @@ function UserProfile({ userData }) {
                                     />
                                     <button type="button" className="btn btn-outline-dark" data-mdb-ripple-color="dark" style={{ zIndex: '1' }}>
                                         edit picture
+                                        <UploadWidget />
                                     </button>
                                 </div>
                                 <div className="ms-3" style={{ marginTop: '130px' }}>
