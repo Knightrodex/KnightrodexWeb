@@ -1,8 +1,10 @@
 const request = require("supertest");
-const app = require("../server");
+const { app, client } = require("../server");
 
 describe("POST /api/signup", () =>
 {
+    let newUserEmail = 'newUser@gmail.com';
+
     test("User with Email Already Exists", async () =>
     {
         const repeatEmail = {
@@ -37,7 +39,7 @@ describe("POST /api/signup", () =>
         const validNewUserCredentials = {
             firstName: "New",
             lastName: "User",
-            email: "newUser@gmail.com",
+            email: newUserEmail,
             password: "SignUpTest123"
         }
 
@@ -59,5 +61,14 @@ describe("POST /api/signup", () =>
             console.log(error.toString());
             throw error;
         }
+    });
+
+    afterEach(async () => 
+    {
+        const response = await client.db('Knightrodex').collection('User').deleteOne(
+            { email:newUserEmail }
+        )
+
+        console.log(response.acknowledged);
     });
 });

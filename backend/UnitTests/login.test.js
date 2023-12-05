@@ -1,5 +1,5 @@
 const request = require("supertest");
-const app = require("../server");
+const { app, client } = require("../server");
 
 describe("POST /api/login", () =>
 {
@@ -54,8 +54,8 @@ describe("POST /api/login", () =>
     test("Verified User Successful Login", async () =>
     {
         const verifiedUserCredentials = {
-            email: "zszach23@gmail.com",
-            password: "SignUpTest123"
+            email: "unittestuser@gmail.com",
+            password: "UnitTest123"
         }
 
         try

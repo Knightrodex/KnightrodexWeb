@@ -5,8 +5,6 @@ const token = require('../createJWT');
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SG_API_KEY);
 
-const defaultPFP = "https://res.cloudinary.com/knightrodex/image/upload/v1701042095/knightrodex_users/defaultPicture.png"
-
 // Status Codes:
 // 200: Ok
 // 400: ID is not a valid ObjectId
@@ -19,15 +17,18 @@ const defaultPFP = "https://res.cloudinary.com/knightrodex/image/upload/v1701042
 // 500: User is already not following other user
 // 500: Internal Server Error
 
-exports.setApp = function (app, client) {
+exports.setApp = function (app, client) 
+{
   const db = client.db('Knightrodex');
   const userCollection = db.collection('User');
   const badgeCollection = db.collection('Badge');
 
   // Check if a given id is a valid ObjectId
   // Sends Error 400: ID is not a valid ObjectId with whatever response given
-  function isValidId(id, response, res) {
-    if (!ObjectId.isValid(id)) {
+  function isValidId(id, response, res) 
+  {
+    if (!ObjectId.isValid(id)) 
+    {
       response.error = "ID is not a valid ObjectId";
       res.status(400).json(response);
       return false;
@@ -37,19 +38,22 @@ exports.setApp = function (app, client) {
   }
 
 
-  function buildPath(route) {
+  function buildPath(route) 
+  {
     const app_name = 'knightrodex-49dcc2a6c1ae';
 
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production') 
+    {
       return 'https://' + app_name + '.herokuapp.com' + route;
     }
-    else {
+    else 
+    {
       return 'http://localhost:3000' + route;
     }
   }
 
   // Use email verification with SendGrid API
-  function verifyEmail(email, response, res, userId) {
+  async function verifyEmail(email, response, res, userId) {
     const msg = {
       to: email, // Change to your recipient
       from: 'knightrodex@outlook.com', // Change to your verified sender
@@ -57,7 +61,7 @@ exports.setApp = function (app, client) {
       text: `Click to verify email: ${buildPath("/VerifyUserPage/?userId=" + userId)}`
     }
 
-    sgMail
+    await sgMail
       .send(msg)
       .then(() => {
         console.log('Verification Email Sent!');
@@ -139,6 +143,8 @@ exports.setApp = function (app, client) {
 
     let response = { userId: '', firstName: '', lastName: '', email: '', error: '' };
 
+    const defaultPFP = "https://res.cloudinary.com/knightrodex/image/upload/v1701042095/knightrodex_users/defaultPicture.png"
+
     const newUser = {
       password: password, email: email, badgesObtained: [],
       firstName: firstName, lastName: lastName, profilePicture: defaultPFP,
@@ -157,7 +163,7 @@ exports.setApp = function (app, client) {
 
       // Insert new user into the database
       const result = await userCollection.insertOne(newUser);
-      const emailStatus = verifyEmail(email, response, res, result.insertedId);
+      const emailStatus = await verifyEmail(email, response, res, result.insertedId);
 
       if (emailStatus == false) {
         res.status(500).json(response);
@@ -184,18 +190,23 @@ exports.setApp = function (app, client) {
     const { userId } = req.body;
     let response = { error: '' }
 
-    try {
-      if (!isValidId(userId, response, res)) {
+    try 
+    {
+      if (!isValidId(userId, response, res)) 
+      {
         return;
       }
 
       const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
-      if (user.isVerified) {
-        response.error('User is already verified.');
+      if (user.isVerified) 
+      {
+        response.error = 'User is already verified.';
         res.status(500).json(response);
+        return;
       }
-      else {
+      else 
+      {
         userCollection.updateOne(
           { _id: new ObjectId(userId) },
           { $set: { "isVerified": true } });
@@ -207,7 +218,7 @@ exports.setApp = function (app, client) {
       response.error = e.toString();
       res.status(500).json(response);
     }
-  })
+  });
 
   app.post('/api/passwordsend', async (req, res) => {
     // incoming email
@@ -414,7 +425,7 @@ exports.setApp = function (app, client) {
       const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
       if (user == null) {
-        response.error = 'User ' + userId + ' Not Found';
+        response.error = 'User Not Found';
         res.status(404).json(response);
         return;
       }
@@ -436,7 +447,7 @@ exports.setApp = function (app, client) {
 
         // Verify badge is in database
         if (badgeInfo == null) {
-          response.error = 'Badge ' + badgeId + ' Not Found';
+          response.error = 'Badge Not Found';
           res.status(404).json(response);
           return;
         }
@@ -638,12 +649,12 @@ exports.setApp = function (app, client) {
 
       // Verify both users exist in database
       if (currentUser == null) {
-        response.error = 'User ' + currentUserId + ' Not Found';
+        response.error = 'User Not Found';
         res.status(404).json(response);
         return;
       }
       else if (otherUser == null) {
-        response.error = 'User ' + otherUserId + ' Not Found';
+        response.error = 'User Not Found';
         res.status(404).json(response);
         return;
       }
@@ -756,6 +767,17 @@ exports.setApp = function (app, client) {
         return;
       }
 
+      // Iterate through the current user's badges and add data to the activity list
+      for (const badgeCollected of currUser.badgesObtained) {
+        const badgeInfo = await badgeCollection.findOne({ _id: new ObjectId(badgeCollected.badgeId) });
+        const activityInfo = {
+          email: currUser.email, firstName: currUser.firstName, lastName: currUser.lastName, profilePicture: currUser.profilePicture,
+          badgeId: badgeCollected.badgeId, badgeTitle: badgeInfo.title,
+          dateObtained: badgeCollected.dateObtained
+        };
+        response.activity.push(activityInfo);
+      };
+
       // Iterate through all followed users
       for (const followedUserId of currUser.usersFollowed) {
         if (!isValidId(followedUserId, response, res)) {
@@ -823,7 +845,7 @@ exports.setApp = function (app, client) {
     }
 
     try {
-      userCollection.updateOne(
+      await userCollection.updateOne(
         { _id: new ObjectId(userId) },
         { $set: { 'profilePicture': profilePicture } }
       );
