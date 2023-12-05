@@ -9,7 +9,6 @@
 }
 
 .navbar-title {
-  color: #0c353a;
   font-size: 36px;
   /* Adjust the font size as needed */
   font-weight: bold;
@@ -22,7 +21,7 @@
 .nav-menu {
   background-color: #ffffff;
   border-right: 1px solid gray;
-  width: 270px;
+  width: 290px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -42,14 +41,14 @@
 .nav-menu-items li {
   padding: 1px 50px;
   margin: 15px;
-  border: 2px solid gray;
+  /* border: 2px solid #eab54f; */
   border-radius: 10px;
   transition: background-color 0.3s;
 
 }
 
 .nav-menu-items li:hover {
-  background-color: #c0c0c0;
+  background-color: #eab54f;
 }
 
 .nav-menu-items li a {
@@ -60,19 +59,15 @@
   font-size: 18px;
 }
 
+.nav-text {
+  font-weight: bold;
 
+}
 
 
 /* 
 
-.nav-text {
-  display: flex;
-  justify-content: start;
-  align-items: center;
-  padding: 0px 0px 8px 16px;
-  list-style: none;
-  height: 60px;
-}
+
 
 .nav-text a {
   text-decoration: none;
