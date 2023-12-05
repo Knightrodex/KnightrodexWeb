@@ -162,7 +162,7 @@ function FriendsSearchBox() {
                                 <p className="text-muted mb-0">{user.email}</p>
                             </div>
                         </div>
-                        <button className="btn btn-sm btn-primary  " onClick={() => handleFollow(user)}>
+                        <button className="btn btn-sm custom-login-btn" onClick={() => handleFollow(user)}>
                             {user.isFollowed ? "Unfollow" : "Follow"}
                         </button>
                     </li>

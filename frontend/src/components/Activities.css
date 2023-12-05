@@ -3,6 +3,11 @@
     background:#eee;
 } */
 
+body {
+    /* background-color: #fbecd4; */
+    /* Add other styles as needed */
+}
+
 .activities {
     max-height: 1200px;
     max-width: 740px;
@@ -15,7 +20,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: left;
-    margin: 50px auto 0 auto;
+    margin: 10px auto 0 auto;
     /* Adds 50px space to the top */
 }
 
@@ -31,10 +36,10 @@ div[class*='col-']>.col-inside-lg {
 
 .activities .unit {
     border-bottom: 1px solid #d8d8d8;
-    padding: 20px 0 20px 60px;
-    min-height: 80px;
+    padding: 10px 0 20px 60px;
+    min-height: 90px;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .activities .unit .avatar {
