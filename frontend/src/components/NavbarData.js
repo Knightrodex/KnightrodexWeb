@@ -18,11 +18,6 @@ export const NavbarData = [
         cName: 'nav-text'
     },
     {
-        title: 'Messages',
-        path: '/team',
-        cName: 'nav-text'
-    },
-    {
         title: 'Sign out',
         path: '/',
         cName: 'nav-text'

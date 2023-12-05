@@ -28,10 +28,7 @@ function ProfilePage() {
         })
         .then((response) => {
             setIsLoading(false);
-
-            response.data.jwtToken = jwtDecode(response.data.jwtToken);
             setUserInfo(response.data);
-            
         })
         .catch(err => {
             console.log(err);

@@ -10,15 +10,6 @@ import axios from 'axios';
 import { setAuthToken } from '../components/setAuthToken';
 
 function HomePage() {
-
-    const users = [ // This is your initial list of users
-        { id: 1, name: 'Steven Bagatini' },
-        { id: 2, name: 'Natalie Smith' },
-        { id: 3, name: 'John Doe' },
-        // Add more user data
-    ];
-
-
     const [userInfo, setUserInfo] = useState();
     const [isLoading, setIsLoading] = useState(true);
 
@@ -37,13 +28,10 @@ function HomePage() {
             jwtToken: localStorage.token
         })
             .then((response) => {
-
                 setUserInfo(response.data);
-
                 setIsLoading(false);
             })
             .catch(err => {
-                console.log("jknsdfknfgsdklsdnbklsedjbfkolsdjb");
                 console.log(err);
             });
     }
@@ -51,7 +39,7 @@ function HomePage() {
     return (
         <>
             <Navbar />
-            <SearchBar users />
+            {/* <SearchBar users /> */}
             {(isLoading) ? <p>Loading...</p> : <Activities userActivity={userInfo} />}
         </>
     );

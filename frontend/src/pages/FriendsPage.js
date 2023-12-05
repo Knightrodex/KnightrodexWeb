@@ -24,49 +24,7 @@ function FriendsPage() {
 
 
 
-    const handleFollow = async (otherUser) => {
-        const jwt = jwtDecode(localStorage.token);
 
-        if (otherUser.isFollowed) {
-            await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/unfollowuser', {
-                currentUserId: jwt.userId,
-                otherUserId: otherUser.userId,
-                jwtToken: localStorage.token
-            })
-                .then((response) => {
-
-                    console.log("Unfollowed user successfully.");
-
-                })
-                .catch(err => {
-                    console.log(err);
-                });
-        }
-        else {
-            await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/followUser', {
-                currentUserId: jwt.userId,
-                otherUserId: otherUser.userId,
-                jwtToken: localStorage.token
-            })
-                .then((response) => {
-
-                    console.log("Followed user Successfully.");
-
-                })
-                .catch(err => {
-                    console.log(err);
-                });
-        }
-
-        setFilteredUsers((prevUsers) =>
-            prevUsers.map((user) =>
-                user.userId === otherUser.userId
-                    ? { ...user, isFollowed: !user.isFollowed }
-                    : user
-            )
-        );
-
-    }
 
     const handleSearch = async (value) => {
         setSearchTerm(value);
@@ -95,7 +53,7 @@ function FriendsPage() {
             <FriendsSearchBox />
 
         </>
-       
+
     );
 
 }

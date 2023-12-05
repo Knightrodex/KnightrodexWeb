@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './FriendsSearchBox.css';
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
-
+import { AdvancedImage } from '@cloudinary/react';
+import { crop } from "@cloudinary/url-gen/actions/resize";
+import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity";
+import { Cloudinary } from "@cloudinary/url-gen";
 import { jwtDecode } from 'jwt-decode';
 
 function FriendsSearchBox() {
@@ -27,20 +30,37 @@ function FriendsSearchBox() {
     const handleFollow = async (otherUser) => {
         const jwt = jwtDecode(localStorage.token);
 
+
+
         if (otherUser.isFollowed) {
-            await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/unfollowuser', {
-                currentUserId: jwt.userId,
-                otherUserId: otherUser.userId,
-                jwtToken: localStorage.token
-            })
-                .then((response) => {
+            const confirmed = window.confirm(`Are you sure you want to ${otherUser.isFollowed ? 'unfollow' : 'follow'} ${otherUser.firstName} ${otherUser.lastName}?`);
 
-                    console.log("Unfollowed user successfully.");
-
+            if (confirmed) {
+                await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/unfollowuser', {
+                    currentUserId: jwt.userId,
+                    otherUserId: otherUser.userId,
+                    jwtToken: localStorage.token
                 })
-                .catch(err => {
-                    console.log(err);
-                });
+                    .then((response) => {
+
+                        console.log("Unfollowed user successfully.");
+
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+
+                setFilteredUsers((prevUsers) =>
+                    prevUsers.map((user) =>
+                        user.userId === otherUser.userId
+                            ? { ...user, isFollowed: !user.isFollowed }
+                            : user
+                    )
+                );
+            }
+
+
+
         }
         else {
             await axios.post('https://knightrodex-49dcc2a6c1ae.herokuapp.com/api/followUser', {
@@ -56,16 +76,27 @@ function FriendsSearchBox() {
                 .catch(err => {
                     console.log(err);
                 });
+
+            setFilteredUsers((prevUsers) =>
+                prevUsers.map((user) =>
+                    user.userId === otherUser.userId
+                        ? { ...user, isFollowed: !user.isFollowed }
+                        : user
+                )
+            );
         }
 
-        setFilteredUsers((prevUsers) =>
-            prevUsers.map((user) =>
-                user.userId === otherUser.userId
-                    ? { ...user, isFollowed: !user.isFollowed }
-                    : user
-            )
-        );
 
+
+    }
+
+    // useEffect runs when the page loads
+    useEffect(() => {
+        getUserData();
+    }, []);
+
+    const getUserData = async () => {
+        handleSearch("");
     }
 
     const handleSearch = async (value) => {
@@ -89,23 +120,23 @@ function FriendsSearchBox() {
         }
     };
 
-    const nearbyUsers = [
-        {
-            id: 1,
-            avatar: 'https://bootdey.com/img/Content/avatar/avatar7.png',
-            name: 'Sophia Page',
-            occupation: 'Software Engineer',
-            distance: '500m away',
-        },
-        {
-            id: 2,
-            avatar: 'https://bootdey.com/img/Content/avatar/avatar6.png',
-            name: 'Emma Johnson',
-            occupation: 'Model at Fashion',
-            distance: '800m away',
-        },
-        // Add more nearby users as needed
-    ];
+    const cld = new Cloudinary({
+        cloud: {
+            cloudName: 'knightrodex'
+        }
+    });
+    
+    const getPublicID = (link) => {
+        const regex = /upload\/(?:v\d+\/)?([^\.]+)/;
+        const match = link.match(regex);
+        return match[1];
+    }
+
+    const configurePfp = (link) => {
+        const pfp = cld.image(getPublicID(link));
+        pfp.resize(crop().width(800).height(800).gravity(autoGravity()));
+        return pfp;
+    }
 
     return (
         <>
@@ -124,13 +155,14 @@ function FriendsSearchBox() {
                 {filteredUsers.map((user) => (
                     <li key={user.userId} className="list-group-item d-flex justify-content-between align-items-center">
                         <div className="d-flex align-items-center">
-                            <img src={user.profilePicture} alt="" style={{ width: '45px', height: '45px' }} className="rounded-circle" />
+                            {/* <img src={user.profilePicture} alt="" style={{ width: '45px', height: '45px' }} className="rounded-circle" /> */}
+                            <AdvancedImage cldImg={configurePfp(user.profilePicture)} style={{ width: '45px', height: '45px' }} className="rounded-circle"/>
                             <div className="ms-3">
                                 <p className="fw-bold mb-1">{`${user.firstName} ${user.lastName}`}</p>
                                 <p className="text-muted mb-0">{user.email}</p>
                             </div>
                         </div>
-                        <button className= "btn btn-sm btn-primary  " onClick={() => handleFollow(user)}>
+                        <button className="btn btn-sm btn-primary  " onClick={() => handleFollow(user)}>
                             {user.isFollowed ? "Unfollow" : "Follow"}
                         </button>
                     </li>

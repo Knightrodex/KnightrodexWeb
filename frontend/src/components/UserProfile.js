@@ -1,13 +1,19 @@
-import React from 'react'
+import React from 'react';
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Tooltip } from 'react-tooltip'
+import { Tooltip } from 'react-tooltip';
 import './UserProfile.css';
+import UploadWidget from './UploadWidget';
+import { AdvancedImage } from '@cloudinary/react';
+import { crop } from "@cloudinary/url-gen/actions/resize";
+import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity";
+import { Cloudinary } from "@cloudinary/url-gen";
 
 function UserProfile({ userData }) {
+    dayjs.extend(relativeTime);
+
     const {
         userId,
         firstName,
@@ -20,7 +26,20 @@ function UserProfile({ userData }) {
         error
     } = userData;
 
-    dayjs.extend(relativeTime);
+    const cld = new Cloudinary({
+        cloud: {
+            cloudName: 'knightrodex'
+        }
+    });
+    
+    const getPublicID = () => {
+        const regex = /upload\/(?:v\d+\/)?([^\.]+)/;
+        const match = profilePicture.match(regex);
+        return match[1];
+    }
+    
+    const pfp = cld.image(getPublicID());
+    pfp.resize(crop().width(800).height(800).gravity(autoGravity()));
 
     return (
         <section className="h-100 gradient-custom-2">
@@ -33,15 +52,8 @@ function UserProfile({ userData }) {
                                 style={{ backgroundColor: '#000', height: '200px' }}
                             >
                                 <div className="ms-4 mt-5 d-flex flex-column" style={{ width: '150px' }}>
-                                    <img
-                                        src={profilePicture}
-                                        alt="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
-                                        className="img-fluid img-thumbnail mt-4 mb-2"
-                                        style={{ width: '150px', zIndex: '1' }}
-                                    />
-                                    <button type="button" className="btn btn-outline-dark" data-mdb-ripple-color="dark" style={{ zIndex: '1' }}>
-                                        edit picture
-                                    </button>
+                                    <AdvancedImage cldImg={pfp} className="img-fluid img-thumbnail mt-4 mb-2" style={{ width: '150px', zIndex: '1' }} />
+                                    <UploadWidget uId={userId} jwt={jwtToken}/>
                                 </div>
                                 <div className="ms-3" style={{ marginTop: '130px' }}>
                                     <h5>{firstName + " " + lastName}</h5>
@@ -69,8 +81,6 @@ function UserProfile({ userData }) {
                                         <p className="font-italic mb-1">
                                             Account created { dayjs(dateCreated).fromNow() }
                                         </p>
-                                        
-                                        
                                     </div>
                                 </div>
                                 <div className="d-flex justify-content-between align-items-center mb-4">
@@ -94,7 +104,6 @@ function UserProfile({ userData }) {
             </div>
         </section>
     );
-
 }
 
 export default UserProfile;
