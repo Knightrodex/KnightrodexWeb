@@ -7,7 +7,7 @@ function Navbar() {
   return (
     <div className="side-navbar">
       <nav className="nav-menu">
-        <h1 className="navbar-title">Knightrodex</h1>
+        <h1 className="navbar-title custom-login-title">Knightrodex</h1>
         <ul className="nav-menu-items">
           {NavbarData.map((item, index) => (
             <li key={index} className={item.cName}>

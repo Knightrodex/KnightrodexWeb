@@ -1,11 +1,27 @@
-.custom-title {
-    color: gold;
+ 
+
+.custom-login-btn {
+    background-color: #eab54f;
     font-weight: bold;
-    font-size: 1.2em;
-    margin-left: 10px; /* Adjust the value based on your needs */
+    /* Make the text bold */
+    transition: background-color 0.3s ease;
+    /* Add a smooth transition effect */
+
 }
 
-/* .custom-login-btn
-{
-    background-color: #17213B;
-} */
+.custom-login-btn:hover,
+.custom-login-btn:active {
+    background-color: #ff8c00;
+    /* Change to a different color on hover and click */
+}
+
+.login-error-text {
+    color: red;
+    text-align: center;
+    /* Add other styles as needed */
+}
+
+.custom-login-title{
+    color: #eab54f;
+ 
+ }

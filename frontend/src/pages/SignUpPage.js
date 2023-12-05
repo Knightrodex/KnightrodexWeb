@@ -153,7 +153,7 @@ const SignUp = () => {
                                 // Show this element if the API call is not successful yet.
                                 <div>
                                     <div className="px-5 ms-xl-4 text-center">
-                                        <span className="h1 fw-bold mb-0">Sign Up</span>
+                                        <span className="h1 fw-bold mb-0 custom-login-title">Sign Up</span>
                                     </div>
                                     <form style={{ width: '23rem' }} onSubmit={handleSubmit}>
                                         <div>
@@ -258,13 +258,13 @@ const SignUp = () => {
                                         </div>
                                         <br />
                                         <br />
-                                        {!isPending && <button className="btn btn-lg btn-primary btn-block" type='submit'>Create Account</button>}
+                                        {!isPending && <button className="btn btn-lg btn-block custom-login-btn" type='submit'>Create Account</button>}
                                         {isPending && <button disabled className="btn btn-info btn-lg btn-block">Adding Account...</button>}
                                     </form>
                                     <div>
                                         <br />
                                         <br />
-                                        <p className="text-center">Already have an account? <a href={buildPath('/')} className="link-info">Login Here</a></p>
+                                        <p className="text-center">Already have an account? <a href={buildPath('/')} className="custom-login-title">Login Here</a></p>
                                     </div>
                                 </div>
                             ) : (
@@ -276,7 +276,7 @@ const SignUp = () => {
 
                                     <div>
                                         <br />
-                                        <p>Please check your email to verify your account then <a href={buildPath('/')} className="link-info">Login Here.</a></p>
+                                        <p>Please check your email to verify your account then <a href={buildPath('/')} className="custom-login-title">Login Here.</a></p>
                                     </div>
                                 </div>
                             )}
