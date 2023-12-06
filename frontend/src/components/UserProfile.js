@@ -49,14 +49,14 @@ function UserProfile({ userData }) {
                         <div className="card">
                             <div
                                 className="rounded-top text-white d-flex flex-row"
-                                style={{ backgroundColor: '#000', height: '200px' }}
+                                style={{ backgroundColor: '#d38c00', height: '200px' }}
                             >
                                 <div className="ms-4 mt-5 d-flex flex-column" style={{ width: '150px' }}>
                                     <AdvancedImage cldImg={pfp} className="img-fluid img-thumbnail mt-4 mb-2" style={{ width: '150px', zIndex: '1' }} />
                                     <UploadWidget uId={userId} jwt={jwtToken}/>
                                 </div>
-                                <div className="ms-3" style={{ marginTop: '130px' }}>
-                                    <h5>{firstName + " " + lastName}</h5>
+                                <div className="ms-3" style={{ marginTop: '130px', color: 'black', fontWeight: 'bold' }}>
+                                    <h3 style={{fontWeight: 'bold' }}>{firstName + " " + lastName}</h3>
                                 </div>
                             </div>
                             <div className="p-4 text-black" style={{ backgroundColor: '#f8f9fa' }}>

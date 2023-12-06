@@ -285,7 +285,7 @@ const SignUp = () => {
                         </div>
                         <div className="col-sm-6 px-0 d-none d-sm-block" style={{ maxHeight: '100vh', overflow: 'hidden' }}>
                             <img
-                                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img3.webp"
+                                src="https://res.cloudinary.com/knightrodex/image/upload/v1701826842/xt5ex6l8ubiftbwuu4oy.png"
                                 alt="Login image"
                                 className="w-100"
                                 style={{ maxWidth: '100%', height: 'auto' }}

@@ -87,7 +87,7 @@ function Login() {
                     <div className="row h-100">
                         <div className="col-sm-6 text-black d-flex flex-column justify-content-center align-items-center">
                             <div className="mb-4">
-                                <i className="fas fa-crow fa-2x me-3" style={{ color: '#709085', marginLeft: '-56px' }}></i>
+                                <i className="fas fa-crow fa-2x me-3" style={{ color: '#d38c00', marginLeft: '-56px' }}></i>
                                 <span className="h1 fw-bold mb-0 custom-login-title">Knightrodex</span>
                             </div>
 
@@ -126,7 +126,7 @@ function Login() {
                         </div>
                         <div className="col-sm-6 px-0 d-none d-sm-block" style={{ maxHeight: '100vh', overflow: 'hidden' }}>
                             <img
-                                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img3.webp"
+                                src="https://res.cloudinary.com/knightrodex/image/upload/v1701826842/xt5ex6l8ubiftbwuu4oy.png"
                                 alt="Login image"
                                 className="w-100"
                                 style={{ maxWidth: '100%', height: 'auto' }}
