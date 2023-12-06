@@ -16,7 +16,6 @@ body {
     padding-bottom: 50px;
 
     /* Centering styles */
-    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: left;
