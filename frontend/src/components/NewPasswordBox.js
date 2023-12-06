@@ -14,6 +14,17 @@ function NewPasswordBox() {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
+    const [vis, setVis] = useState("password")
+
+    const toggleVis = () => {
+        if (vis === "password") {
+            setVis("text");
+            return;
+        }
+
+        setVis("password");
+        return;
+    }
 
 
     const handlePasswordChange = (e) => {
@@ -52,8 +63,7 @@ function NewPasswordBox() {
             setError('Invalid Email. Please try again.');
         }
     };
-
-
+ 
     return (
         <div className="text-center" style={{ marginTop: '30vh' }}>
             <div className="container">
@@ -80,18 +90,21 @@ function NewPasswordBox() {
                                                     </span>
                                                     <input
                                                         id="email"
-                                                        name="email"
+                                                        name="password"
+                                                        type = { vis }
                                                         placeholder="New Password"
                                                         className="form-control"
                                                         value={newPassword} // Add this line to bind the input value to the state
                                                         onChange={handlePasswordChange} // Add this line to handle email changes
                                                     />
                                                 </div>
+                                                <p> <input type="checkbox" onClick={() => toggleVis()} /> Toggle Visibility</p >
+
                                             </div>
-                                            <div className="custom-form-group small-gap">
+                                            <div className="custom-form-group mt-4">
                                                 <input
                                                     name="recover-submit"
-                                                    className="btn btn-lg btn-primary btn-block"
+                                                    className="btn btn-lg custom-login-btn btn-block"
                                                     value="Update Password"
                                                     type="submit"
                                                 />

@@ -73,7 +73,7 @@ function ForgotPasswordBox({ onSuccess }) {
                                             <div className="custom-form-group small-gap">
                                                 <input
                                                     name="recover-submit"
-                                                    className="btn btn-lg btn-primary btn-block"
+                                                    className="btn btn-lg custom-login-btn btn-block"
                                                     value="Receive Reset Code"
                                                     type="submit"
                                                 />
